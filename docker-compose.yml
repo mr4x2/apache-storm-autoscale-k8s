@@ -1,0 +1,44 @@
+services:
+  zookeeper:
+    image: zookeeper
+    container_name: zookeeper
+    networks:
+      storm_network:
+    # Add this volume to the zookeeper service in docker-compose.yml
+    volumes:
+      - ./config/zoo.cfg:/apache-zookeeper-3.9.2-bin/conf/zoo.cfg
+
+
+  nimbus:
+    image: storm
+    container_name: nimbus
+    command: storm nimbus
+    volumes:
+      - ./config/storm-nimbus.yaml:/conf/storm.yaml
+    networks:
+      storm_network:
+      
+
+  supervisor:
+    image: storm
+    container_name: supervisor
+    command: storm supervisor
+    volumes:
+      - ./config/storm-nimbus.yaml:/conf/storm.yaml
+    networks:
+      storm_network:
+
+  ui:
+    image: storm
+    container_name: ui
+    command: storm ui
+    volumes:
+      - ./config/storm-nimbus.yaml:/conf/storm.yaml
+    networks:
+      storm_network:
+    ports:
+      - 8081:8081
+
+networks:
+  storm_network:
+    driver: bridge
