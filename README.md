@@ -1,6 +1,17 @@
 # train-with-storm
 
 
+### How to run topology
+
+```cmd
+docker cp target/storm-src-1.0-SNAPSHOT.jar nimbus:/
+
+docker exec -it bash nimbus
+
+storm jar /storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.TopologyClassName
+
+```
+
 ### How to debug
 
 ```cmd

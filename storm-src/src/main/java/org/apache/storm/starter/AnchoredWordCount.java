@@ -12,23 +12,15 @@
 
 package org.apache.storm.starter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 import org.apache.storm.Config;
-import org.apache.storm.spout.SpoutOutputCollector;
-import org.apache.storm.task.TopologyContext;
-import org.apache.storm.topology.BasicOutputCollector;
+
+import org.apache.storm.starter.bolt.SplitSentence;
+import org.apache.storm.starter.bolt.WordCount;
+import org.apache.storm.starter.spout.RandomSentenceSpout;
 import org.apache.storm.topology.ConfigurableTopology;
-import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.topology.base.BaseBasicBolt;
-import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
+
 
 public class AnchoredWordCount extends ConfigurableTopology {
 
@@ -37,7 +29,7 @@ public class AnchoredWordCount extends ConfigurableTopology {
     }
 
     @Override
-    protected int run(String[] args)  {
+    protected int run(String[] args) {
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("spout", new RandomSentenceSpout(), 4);
@@ -59,86 +51,10 @@ public class AnchoredWordCount extends ConfigurableTopology {
         return submit(topologyName, conf, builder);
     }
 
-    public static class RandomSentenceSpout extends BaseRichSpout {
-        SpoutOutputCollector collector;
-        Random random;
 
 
-        @Override
-        public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-            this.collector = collector;
-            this.random = new Random();
-        }
 
-        @Override
-        public void nextTuple() {
-            Utils.sleep(10);
-            String[] sentences = new String[]{
-                    sentence("the cow jumped over the moon"), sentence("an apple a day keeps the doctor away"),
-                    sentence("four score and seven years ago"),
-                    sentence("snow white and the seven dwarfs"), sentence("i am at two with nature")
-            };
-            final String sentence = sentences[random.nextInt(sentences.length)];
-            System.out.println("Log emit spout"+sentence);
 
-            this.collector.emit(new Values(sentence), UUID.randomUUID());
-        }
-
-        protected String sentence(String input) {
-            return input;
-        }
-
-        @Override
-        public void ack(Object id) {
-        }
-
-        @Override
-        public void fail(Object id) {
-        }
-
-        @Override
-        public void declareOutputFields(OutputFieldsDeclarer declarer) {
-            declarer.declare(new Fields("word"));
-        }
-    }
-
-    public static class SplitSentence extends BaseBasicBolt {
-        @Override
-        public void execute(Tuple tuple, BasicOutputCollector collector) {
-            String sentence = tuple.getString(0);
-            for (String word : sentence.split("\\s+")) {
-                collector.emit(new Values(word, 1));
-            }
-            System.out.println("Log bolt SplitSentence"+sentence);
-        }
-
-        @Override
-        public void declareOutputFields(OutputFieldsDeclarer declarer) {
-            declarer.declare(new Fields("word", "count"));
-        }
-    }
-
-    public static class WordCount extends BaseBasicBolt {
-        Map<String, Integer> counts = new HashMap<>();
-
-        @Override
-        public void execute(Tuple tuple, BasicOutputCollector collector) {
-            String word = tuple.getString(0);
-            Integer count = counts.get(word);
-            if (count == null) {
-                count = 0;
-            }
-            count++;
-            counts.put(word, count);
-            collector.emit(new Values(word, count));
-            System.out.println("Log bolt WordCount"+word+" "+count);
-        }
-
-        @Override
-        public void declareOutputFields(OutputFieldsDeclarer declarer) {
-            declarer.declare(new Fields("word", "count"));
-        }
-    }
 }
 
 
