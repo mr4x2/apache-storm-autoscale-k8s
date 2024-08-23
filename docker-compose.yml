@@ -39,6 +39,21 @@ services:
     ports:
       - 8081:8081
 
+  storm-exporter:
+    image: mr4x2/stormexporter:v1
+    container_name: storm-exporter
+    environment:
+      - STORM_UI_HOST=ui:8081
+      - PORT_EXPOSE=8082
+      - REFRESH_RATE=5
+    networks:
+      storm_network:
+    ports:
+      - 8082:8082
+    depends_on:
+      - ui
+    # TODO: update health check with depend on to avoid fail in run container
+
 networks:
   storm_network:
     driver: bridge
