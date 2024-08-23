@@ -16,7 +16,7 @@ services:
       - ./config/storm-nimbus.yaml:/conf/storm.yaml
     networks:
       storm_network:
-      
+
 
   supervisor:
     image: storm

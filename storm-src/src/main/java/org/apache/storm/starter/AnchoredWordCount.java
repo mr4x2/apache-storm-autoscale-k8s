@@ -52,9 +52,6 @@ public class AnchoredWordCount extends ConfigurableTopology {
     }
 
 
-
-
-
 }
 
 
