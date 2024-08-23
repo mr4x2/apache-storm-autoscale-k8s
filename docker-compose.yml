@@ -4,7 +4,6 @@ services:
     container_name: zookeeper
     networks:
       storm_network:
-    # Add this volume to the zookeeper service in docker-compose.yml
     volumes:
       - ./config/zoo.cfg:/apache-zookeeper-3.9.2-bin/conf/zoo.cfg
 
@@ -53,6 +52,8 @@ services:
     depends_on:
       - ui
     # TODO: update health check with depend on to avoid fail in run container
+
+# TODO: add log with fluentd to get log from supervisor
 
 networks:
   storm_network:
