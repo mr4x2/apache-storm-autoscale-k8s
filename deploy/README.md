@@ -4,19 +4,19 @@
 Run nimus and ui
 
 ```cmd
-docker run -d -p 6622:6627 -p 8081:8081 --name storm-nimbus-ui mr4x2/nimbus:v2
+docker run -d -p 6627:6627 -p 8081:8081 --name storm-nimbus-ui mr4x2/nimbus:v2
 ```
 
 Run zookeeper
 
 ```cmd
-docker run --name zookeeper -d -p 2181:2181 mr4x2/zookeeper:v1
+docker run -d -p 2181:2181 --name zookeeper mr4x2/zookeeper:v1
 ```
 
 Run supervisor
 
 ```cmd
-docker run -d -p 6622:6627 -p 6700-6703:6700-6703 --name storm-supervisor mr4x2/supervisor:v1
+docker run -d -p 6700-6703:6700-6703 --name storm-supervisor mr4x2/supervisor:v1
 ```
 
 
