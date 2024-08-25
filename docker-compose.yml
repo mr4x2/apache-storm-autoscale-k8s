@@ -23,7 +23,7 @@ services:
     container_name: supervisor
     command: storm supervisor
     volumes:
-      - ./config/storm-nimbus.yaml:/conf/storm.yaml
+      - ./config/storm-supervisor.yaml:/conf/storm.yaml
     networks:
       storm_network:
 
