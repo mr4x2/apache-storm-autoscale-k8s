@@ -6,6 +6,6 @@ WORKDIR /app
 
 COPY ./config/storm-nimbus.yaml /conf/storm.yaml
 
-EXPOSE 6627
+EXPOSE 6627 8081
 
-CMD ["storm", "nimbus"]
+CMD ["sh", "-c", "storm nimbus & storm ui"]
