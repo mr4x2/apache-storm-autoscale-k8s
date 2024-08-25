@@ -1,0 +1,29 @@
+---
+# tasks file for deploy
+- name: Create storm ui
+  hosts: tuda_storm_nimbus_ui
+  community.docker.docker_container:
+    name: storm-nimbus-ui
+    image: mr4x2/nimbus:v2
+    restart: true
+    ports:
+     - "6622:6627"
+     - "8081:8081"
+
+- name: Create zookeeper
+  hosts: tuda_zookeeper
+  community.docker.docker_container:
+    name: zookeeper
+    image: mr4x2/zookeeper:v1
+    restart: true
+    ports:
+     - "2181:2181"
+
+- name: Create supervisor
+  hosts: tuda_supervisor
+  community.docker.docker_container:
+    name: storm-supervisor
+    image: mr4x2/supervisor:v1
+    restart: true
+    ports:
+     - "6700-6703:6700-6703"

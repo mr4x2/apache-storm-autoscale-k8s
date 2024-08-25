@@ -1,0 +1,6 @@
+- name: deploy storm stack
+  hosts: openstack-uet
+  become: true
+  gather_facts: true
+  roles:
+    - deploy
