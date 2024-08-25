@@ -1,6 +1,23 @@
-- name: deploy storm stack
-  hosts: openstack-uet
+- name: deploy storm ui
+  hosts: tuda_storm_nimbus_ui
   become: true
   gather_facts: true
   roles:
-    - deploy
+    - role: deploy
+      tags: deploy_nimbus
+
+- name: deploy storm zookeeper
+  hosts: tuda_zookeeper
+  become: true
+  gather_facts: true
+  roles:
+    - role: deploy
+      tags: deploy_zookeeper
+
+- name: deploy storm supervisor
+  hosts: tuda_supervisor
+  become: true
+  gather_facts: true
+  roles:
+    - role: deploy
+      tags: deploy_supervisor
