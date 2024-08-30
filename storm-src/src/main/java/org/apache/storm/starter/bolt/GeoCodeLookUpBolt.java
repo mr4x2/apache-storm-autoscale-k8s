@@ -11,6 +11,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class GeoCodeLookUpBolt extends BaseBasicBolt {
@@ -26,9 +27,14 @@ public class GeoCodeLookUpBolt extends BaseBasicBolt {
         String address = input.getStringByField("address");
         Long time = input.getLongByField("time");
         GeocoderRequest request = new GeocoderRequestBuilder().setAddress(address).setLanguage("en").getGeocoderRequest();
-        GeocodeResponse response = geocoder.geocode(request);
+        GeocodeResponse response = null;
+        try {
+            response = geocoder.geocode(request);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         GeocoderStatus status = response.getStatus();
-        if (GeocoderStatus.OK.equals(status)){
+        if (GeocoderStatus.OK.equals(status)) {
             GeocoderResult firstResult = response.getResults().get(0);
             LatLng latLng = firstResult.getGeometry().getLocation();
             collector.emit(new Values(time, latLng));
