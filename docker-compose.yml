@@ -6,6 +6,7 @@ services:
       storm_network:
     volumes:
       - ./config/zoo.cfg:/apache-zookeeper-3.9.2-bin/conf/zoo.cfg
+    # TODO: add more node to make zookeeper HA
 
 
   nimbus:
@@ -16,6 +17,7 @@ services:
       - ./config/storm-nimbus.yaml:/conf/storm.yaml
     networks:
       storm_network:
+    # TODO: add more node to make nimbus HA
 
 
   supervisor:
