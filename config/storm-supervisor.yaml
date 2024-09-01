@@ -1,6 +1,7 @@
 # Telling the Supervisor where the Zookeeper is.
 storm.zookeeper.servers:
   - "zookeeper"
+  - "zookeeper2"
 
 # The worker nodes need to know which machine(s) are the candidate of master
 # in order to download the topology jars.
