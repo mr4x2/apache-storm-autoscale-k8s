@@ -21,6 +21,11 @@
             <artifactId>storm-core</artifactId>
             <version>2.6.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.storm</groupId>
+            <artifactId>storm-client</artifactId>
+            <version>2.6.2</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.geocoder-java/geocoder-java -->
         <dependency>
             <groupId>com.google.code.geocoder-java</groupId>
