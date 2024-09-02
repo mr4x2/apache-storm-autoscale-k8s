@@ -6,13 +6,6 @@ services:
       storm_network:
     volumes:
       - ./config/zoo.cfg:/apache-zookeeper-3.9.2-bin/conf/zoo.cfg
-  zookeeper2:
-    image: zookeeper
-    container_name: zookeeper2
-    networks:
-      storm_network:
-    volumes:
-      - ./config/zoo.cfg:/apache-zookeeper-3.9.2-bin/conf/zoo.cfg
 
 
   nimbus:
