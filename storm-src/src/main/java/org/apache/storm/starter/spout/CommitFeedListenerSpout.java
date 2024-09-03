@@ -11,6 +11,7 @@ import org.apache.storm.tuple.Values;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class CommitFeedListenerSpout extends BaseRichSpout {
 
@@ -34,16 +35,20 @@ public class CommitFeedListenerSpout extends BaseRichSpout {
     @Override
     public void nextTuple() {
         for (String commit : commits) {
-            collector.emit(new Values(commit));
+            Random random = new Random();
+            collector.emit(new Values(commit), random.nextInt(999999));
         }
     }
 
 
     @Override
     public void ack(Object id) {
+        System.out.println("Tuple with ID " + id + " acknowledged.");
     }
 
     @Override
     public void fail(Object id) {
+        System.out.println("Tuple with ID " + id + " failed.");
+        // You can implement logic here to re-emit the tuple or handle the failure
     }
 }

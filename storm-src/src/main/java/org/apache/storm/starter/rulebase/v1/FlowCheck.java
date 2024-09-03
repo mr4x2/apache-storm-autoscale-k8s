@@ -64,7 +64,7 @@ public class FlowCheck {
 
 
     public static int countThreads() {
-
+//    1 thread = 1 executor
         int threads = 0;
 
         for (String key : spoutMap.keySet()) {

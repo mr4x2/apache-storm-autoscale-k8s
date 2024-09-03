@@ -105,6 +105,7 @@ public class TopologyParser {
 
                 parts = line.split(" ");
                 targetThroughput.put(parts[0], Double.parseDouble(parts[1]));
+                System.out.println(targetThroughput.get(parts[0]));
             }
         }
     }
@@ -150,6 +151,43 @@ public class TopologyParser {
             readInput(args[0]);
             System.out.println("Reading throughput configuration file");
             readTargetThroughput(args[1]);
+            System.out.println("Initializing Metrics");
+            initMetrics();
+
+            FlowCheck flow = new FlowCheck(topologyName, spoutMap, boltMap, targetThroughput);
+
+            while (true) {
+                System.out.println("Wait for 30 sec");
+                Thread.sleep(30 * 1000);
+
+                System.out.println("Update topology stats");
+                updateTopology();
+
+                System.out.println("Check the flow");
+                flow.initFlowCheck();
+
+                if (flow.isRebalanced()) {
+                    System.out.println("Wait to rebalance: 30sec");
+                    Thread.sleep(30 * 1000);
+
+                    initMetrics();
+
+                    flow.rebalanceInit();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void autoScale(String inputFile, String targetFile) {
+        try {
+
+
+            System.out.println("Reading topology configuration file");
+            readInput(inputFile);
+            System.out.println("Reading throughput configuration file");
+            readTargetThroughput(targetFile);
             System.out.println("Initializing Metrics");
             initMetrics();
 
