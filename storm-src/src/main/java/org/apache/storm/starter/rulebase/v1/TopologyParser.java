@@ -2,8 +2,7 @@ package org.apache.storm.starter.rulebase.v1;
 
 import org.apache.storm.starter.metric.ComponentMetricsCreator;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,48 +15,52 @@ public class TopologyParser {
     private static Map<String, Double> targetThroughput;
 
 
-    public static void readInput(String fileName) { //TODO throw the exception instead of catch
+    public static void readInput(String fileName) throws Exception {
+        spoutMap = new HashMap<>();
+        boltMap = new HashMap<>();
 
-        spoutMap = new HashMap<String, ComponentNode>();
-        boltMap = new HashMap<String, ComponentNode>();
+        // Use class loader to get the resource
+        try (InputStream inputStream = TopologyParser.class.getClassLoader().getResourceAsStream(fileName);
+             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
 
-        try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
+            if (inputStream == null) {
+                throw new FileNotFoundException("File not found in resources: " + fileName);
+            }
+
             String line;
             String[] parts;
             ComponentNode source;
             ComponentNode destination;
 
-
-            if ((line = in.readLine()) != null)
+            if ((line = in.readLine()) != null) {
                 topologyName = line;
-            else
+            } else {
                 throw new Exception("Empty file: " + fileName);
-
+            }
 
             while ((line = in.readLine()) != null) {
-
-                if (!line.contains(" "))
+                if (!line.contains(" ")) {
                     throw new IllegalArgumentException("String '" + line + "' does not contain space");
-
+                }
 
                 parts = line.split(" ");
 
-                if (parts.length != 2)
+                if (parts.length != 2) {
                     throw new IllegalArgumentException("String '" + line + "' should contain exactly 2 vertices");
+                }
 
-
-                //TODO throw exception when part[1] is spout
-                if (spoutMap.containsKey(parts[1]))
+                if (spoutMap.containsKey(parts[1])) {
                     destination = spoutMap.get(parts[1]);
-                else if (boltMap.containsKey(parts[1]))
+                } else if (boltMap.containsKey(parts[1])) {
                     destination = boltMap.get(parts[1]);
-                else {
+                } else {
                     destination = new ComponentNode(new ComponentMetricsCreator(topologyName, parts[1]));
 
-                    if (destination.getNode().getComponentType() == 1)
+                    if (destination.getNode().getComponentType() == 1) {
                         boltMap.put(parts[1], destination);
-                    else if (destination.getNode().getComponentType() == 2)
+                    } else if (destination.getNode().getComponentType() == 2) {
                         spoutMap.put(parts[1], destination);
+                    }
                 }
 
                 if (spoutMap.containsKey(parts[0])) {
@@ -70,38 +73,39 @@ public class TopologyParser {
                     source = new ComponentNode(new ComponentMetricsCreator(topologyName, parts[0]));
                     source.addNeighbor(destination);
 
-                    if (source.getNode().getComponentType() == 1)
+                    if (source.getNode().getComponentType() == 1) {
                         boltMap.put(parts[0], source);
-                    else if (source.getNode().getComponentType() == 2)
+                    } else if (source.getNode().getComponentType() == 2) {
                         spoutMap.put(parts[0], source);
+                    }
                 }
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
-    public static void readTargetThroughput(String fileName) {
 
+    public static void readTargetThroughput(String fileName) throws Exception {
         targetThroughput = new HashMap<String, Double>();
 
-        try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
+        // Use class loader to get the resource
+        try (InputStream inputStream = TopologyParser.class.getClassLoader().getResourceAsStream(fileName);
+             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            if (inputStream == null) {
+                throw new FileNotFoundException("File not found in resources: " + fileName);
+            }
+
             String line;
             String[] parts;
 
             while ((line = in.readLine()) != null) {
-
-                if (!line.contains(" "))
-                    throw new IllegalArgumentException("String " + line + " does not contain space");
-
+                if (!line.contains(" ")) {
+                    throw new IllegalArgumentException("String '" + line + "' does not contain space");
+                }
 
                 parts = line.split(" ");
-
                 targetThroughput.put(parts[0], Double.parseDouble(parts[1]));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
