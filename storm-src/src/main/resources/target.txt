@@ -1,1 +1,1 @@
-commit-feed-email 10000
+commit-feed-email 3000

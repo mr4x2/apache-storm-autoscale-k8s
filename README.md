@@ -82,3 +82,11 @@ builder.setBolt("wordCount", new CountWord(), 3).fieldsGrouping("split", new Fie
 ```cmd
 storm jar /storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.rulebase.v1.TopologyAutoScaleCode input.txt target.txt
 ```
+
+### TODO
+
+**This is todo list must be done**
+
+- [ ] Write config to yaml
+- [ ] Smart autoscale
+- [ ] Skip autoscale if metric isn't collected
