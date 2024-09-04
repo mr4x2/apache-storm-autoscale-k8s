@@ -75,3 +75,10 @@ Reason is config in Topology between 2 bolt to get tuple
 builder.setBolt("split", new SplitWord(), 3).shuffleGrouping("spout");
 builder.setBolt("wordCount", new CountWord(), 3).fieldsGrouping("split", new Fields("word"));
 ```
+
+
+### How to run autoscale program
+
+```cmd
+storm jar /storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.rulebase.v1.TopologyAutoScaleCode input.txt target.txt
+```
