@@ -6,7 +6,7 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.starter.rulebase.v1.TopologyParser;
 
 public class NewScaleTopology {
-    public static void main(String[] args) throws  Exception{
+    public static void main(String[] args) throws Exception {
         Config conf = new Config();
         conf.setDebug(true);
         conf.setMaxTaskParallelism(4);
@@ -15,8 +15,5 @@ public class NewScaleTopology {
         StormTopology topology = GithubCommitCountTopo.build();
         String topologyName = "test-scale-github-counter";
         StormSubmitter.submitTopology(topologyName, conf, topology);
-//      Run autoscale program alongside topology
-        TopologyParser topologyParser = new TopologyParser();
-        topologyParser.autoScale("input.txt", "target.txt");
     }
 }
