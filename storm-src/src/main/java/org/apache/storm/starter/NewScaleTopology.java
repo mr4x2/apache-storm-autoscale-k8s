@@ -15,6 +15,7 @@ public class NewScaleTopology {
         StormTopology topology = GithubCommitCountTopo.build();
         String topologyName = "test-scale-github-counter";
         StormSubmitter.submitTopology(topologyName, conf, topology);
+//      Run autoscale program alongside topology
         TopologyParser topologyParser = new TopologyParser();
         topologyParser.autoScale("input.txt", "target.txt");
     }

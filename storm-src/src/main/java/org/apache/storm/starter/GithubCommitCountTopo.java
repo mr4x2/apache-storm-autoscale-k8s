@@ -11,9 +11,9 @@ public class GithubCommitCountTopo {
 
     public static StormTopology build() {
         TopologyBuilder builder = new TopologyBuilder();
-        builder.setSpout("commit-feed-email", new CommitFeedListenerSpout(), 1);
-        builder.setBolt("email-extractor", new EmailExtractorBolt(), 1).shuffleGrouping("commit-feed-email");
-        builder.setBolt("email-counter", new EmailCounterBolt(), 1).fieldsGrouping("email-extractor", new Fields("email"));
+        builder.setSpout("commit-feed-email", new CommitFeedListenerSpout(), 2).setNumTasks(2).setMaxTaskParallelism(250);
+        builder.setBolt("email-extractor", new EmailExtractorBolt(), 2).shuffleGrouping("commit-feed-email").setNumTasks(4).setMaxTaskParallelism(250);
+        builder.setBolt("email-counter", new EmailCounterBolt(), 2).fieldsGrouping("email-extractor", new Fields("email")).setNumTasks(2).setMaxTaskParallelism(250);
         return builder.createTopology();
     }
 
