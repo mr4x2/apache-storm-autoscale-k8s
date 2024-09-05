@@ -14,7 +14,7 @@ public class TopologyParser {
     private static Map<String, ComponentNode> boltMap;
     private static Map<String, Double> targetThroughput;
 
-//    Read input file which is included name of topology, component
+    //    Read input file which is included name of topology, component
     public static void readInput(String fileName) throws Exception {
         spoutMap = new HashMap<>();
         boltMap = new HashMap<>();
@@ -83,7 +83,7 @@ public class TopologyParser {
         }
     }
 
-// Read target each component
+    // Read target each component
     public static void readTargetThroughput(String fileName) throws Exception {
         targetThroughput = new HashMap<String, Double>();
 
@@ -105,7 +105,6 @@ public class TopologyParser {
 
                 parts = line.split(" ");
                 targetThroughput.put(parts[0], Double.parseDouble(parts[1]));
-                System.out.println(targetThroughput.get(parts[0]));
             }
         }
     }
@@ -138,7 +137,7 @@ public class TopologyParser {
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
 
             if (args.length != 2) {
@@ -158,7 +157,7 @@ public class TopologyParser {
 
             while (true) {
                 System.out.println("Wait for 30 sec");
-                Thread.sleep(30 * 1000);
+                Thread.sleep(60 * 1000);
 
                 System.out.println("Update topology stats");
                 updateTopology();
@@ -168,7 +167,7 @@ public class TopologyParser {
 
                 if (flow.isRebalanced()) {
                     System.out.println("Wait to rebalance: 30sec");
-                    Thread.sleep(30 * 1000);
+                    Thread.sleep(60 * 1000);
 
                     initMetrics();
 
@@ -195,7 +194,7 @@ public class TopologyParser {
 
             while (true) {
                 System.out.println("Wait for 30 sec");
-                Thread.sleep(30 * 1000);
+                Thread.sleep(60 * 1000);
 
                 System.out.println("Update topology stats");
                 updateTopology();
@@ -205,7 +204,7 @@ public class TopologyParser {
 
                 if (flow.isRebalanced()) {
                     System.out.println("Wait to rebalance: 30sec");
-                    Thread.sleep(30 * 1000);
+                    Thread.sleep(60 * 1000);
 
                     initMetrics();
 
