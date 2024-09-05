@@ -14,7 +14,7 @@ public class TopologyParser {
     private static Map<String, ComponentNode> boltMap;
     private static Map<String, Double> targetThroughput;
 
-
+//    Read input file which is included name of topology, component
     public static void readInput(String fileName) throws Exception {
         spoutMap = new HashMap<>();
         boltMap = new HashMap<>();
@@ -83,7 +83,7 @@ public class TopologyParser {
         }
     }
 
-
+// Read target each component
     public static void readTargetThroughput(String fileName) throws Exception {
         targetThroughput = new HashMap<String, Double>();
 
