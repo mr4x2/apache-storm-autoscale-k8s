@@ -156,8 +156,8 @@ public class TopologyParser {
             FlowCheck flow = new FlowCheck(topologyName, spoutMap, boltMap, targetThroughput);
 
             while (true) {
-                System.out.println("Wait for 30 sec");
-                Thread.sleep(60 * 1000);
+                System.out.println("Wait for 30 secs");
+                Thread.sleep(30 * 1000);
 
                 System.out.println("Update topology stats");
                 updateTopology();
@@ -166,12 +166,13 @@ public class TopologyParser {
                 flow.initFlowCheck();
 
                 if (flow.isRebalanced()) {
-                    System.out.println("Wait to rebalance: 30sec");
-                    Thread.sleep(60 * 1000);
+                    System.out.println("Wait to rebalance: 30 sec");
+                    Thread.sleep(30 * 1000);
 
                     initMetrics();
 
                     flow.rebalanceInit();
+                    System.out.println("Rebalance done");
                 }
             }
         } catch (Exception e) {
@@ -193,8 +194,8 @@ public class TopologyParser {
             FlowCheck flow = new FlowCheck(topologyName, spoutMap, boltMap, targetThroughput);
 
             while (true) {
-                System.out.println("Wait for 30 sec");
-                Thread.sleep(60 * 1000);
+                System.out.println("Wait for 30 secs");
+                Thread.sleep(30 * 1000);
 
                 System.out.println("Update topology stats");
                 updateTopology();
@@ -203,8 +204,8 @@ public class TopologyParser {
                 flow.initFlowCheck();
 
                 if (flow.isRebalanced()) {
-                    System.out.println("Wait to rebalance: 30sec");
-                    Thread.sleep(60 * 1000);
+                    System.out.println("Wait to rebalance: 30 secs");
+                    Thread.sleep(30 * 1000);
 
                     initMetrics();
 
