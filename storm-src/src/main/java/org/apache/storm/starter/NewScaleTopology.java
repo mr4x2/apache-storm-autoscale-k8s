@@ -3,7 +3,6 @@ package org.apache.storm.starter;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.starter.rulebase.v1.TopologyParser;
 
 public class NewScaleTopology {
     public static void main(String[] args) throws Exception {
@@ -13,7 +12,7 @@ public class NewScaleTopology {
         conf.setNumWorkers(4);
 
         StormTopology topology = GithubCommitCountTopo.build();
-        String topologyName = "test-scale-github-counter";
+        String topologyName = "test-get-metric";
         StormSubmitter.submitTopology(topologyName, conf, topology);
     }
 }
