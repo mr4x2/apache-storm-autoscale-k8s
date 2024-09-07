@@ -38,7 +38,7 @@ public class FlowCheck {
         changes = 0;
         cores = 2;
         workers = 1;
-        maxWorkers = 4;
+        maxWorkers = 8;
 
         this.spoutMap = spoutMap;
         this.boltMap = boltMap;
@@ -54,7 +54,7 @@ public class FlowCheck {
             severity.put(key, 0);
             previousRootStats.put(key, new SpoutMetrics(((SpoutMetricsUpdater)spoutMap.get(key).getNode().getComponentUpdater()).getSpoutMetrics()));
         }
-        maxSeverity = 2;
+        maxSeverity = 8;
 
         previousConfig = new RebalanceMove();
         currentConfig = new RebalanceMove();
@@ -65,6 +65,7 @@ public class FlowCheck {
 
     public static int countThreads() {
 //    1 thread = 1 executor
+//        count sum of executors
         int threads = 0;
 
         for (String key : spoutMap.keySet()) {
