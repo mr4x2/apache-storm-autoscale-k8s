@@ -89,4 +89,4 @@ storm jar /storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.rulebase.v1.Topol
 
 - [ ] Write config to yaml
 - [ ] Smart autoscale
-- [ ] Skip autoscale if metric isn't collected
+- [X] Skip autoscale if metric isn't collected
