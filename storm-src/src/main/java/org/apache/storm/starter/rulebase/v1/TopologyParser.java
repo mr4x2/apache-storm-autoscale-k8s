@@ -139,17 +139,10 @@ public class TopologyParser {
 
     public static void main(String[] args) {
         try {
-
-            if (args.length != 2) {
-                System.out.println("Usage: TopologyParser <topology_filename> <throughput_target_filename");
-                System.exit(1);
-            }
-
-
             System.out.println("Reading topology configuration file");
-            readInput(args[0]);
+            readInput("input.txt");
             System.out.println("Reading throughput configuration file");
-            readTargetThroughput(args[1]);
+            readTargetThroughput("target.txt");
             System.out.println("Initializing Metrics");
             initMetrics();
 
