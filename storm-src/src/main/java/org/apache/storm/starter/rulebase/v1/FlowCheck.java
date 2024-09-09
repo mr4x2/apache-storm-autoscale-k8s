@@ -54,7 +54,7 @@ public class FlowCheck {
             severity.put(key, 0);
             previousRootStats.put(key, new SpoutMetrics(((SpoutMetricsUpdater)spoutMap.get(key).getNode().getComponentUpdater()).getSpoutMetrics()));
         }
-        maxSeverity = 8;
+        maxSeverity = 2;
 
         previousConfig = new RebalanceMove();
         currentConfig = new RebalanceMove();
