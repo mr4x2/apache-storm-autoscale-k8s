@@ -224,7 +224,7 @@ public class FlowCheck {
             bolt = queue.poll();
             boltStats = ((BoltMetricsUpdater) bolt.getNode().getComponentUpdater()).getBoltMetrics();
         }
-        while(boltStats.getCapacity() > 0.8 );
+        while(boltStats.getCapacity() > 0.7 );
 
 
     }
