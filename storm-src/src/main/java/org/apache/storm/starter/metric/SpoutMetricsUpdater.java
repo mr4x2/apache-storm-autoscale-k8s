@@ -44,8 +44,8 @@ public class SpoutMetricsUpdater implements ComponentMetricsUpdaterInterface {
             }
             double AckedRate = (double) (totalAcked) / 600;
             spoutMetrics.setAckedRate(AckedRate);
-            spoutMetrics.setEmitRate((double) (totalEmitted - spoutMetrics.getEmitted()) / (uptime - spoutMetrics.getUptime()));
-            spoutMetrics.setTransferRate((double) (totalTransfered - spoutMetrics.getTransfered()) / (uptime - spoutMetrics.getUptime()));
+            spoutMetrics.setEmitRate((double) totalEmitted / 600);
+            spoutMetrics.setTransferRate((double) (totalTransfered) / 600);
             spoutMetrics.setCompleteLatency(avgCompleteLatency / totalAcked);
             spoutMetrics.setUptime(uptime);
             spoutMetrics.setAcked(totalAcked);
