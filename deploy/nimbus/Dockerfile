@@ -1,4 +1,4 @@
-FROM storm:latest
+FROM storm:2.6.2
 
 RUN mkdir /app
 

@@ -25,7 +25,7 @@ java.library.path: "/usr/local/lib:/opt/local/lib:/usr/lib:/usr/lib64"
 storm.local.dir: "storm-local"
 storm.log4j2.conf.dir: "log4j2"
 storm.zookeeper.servers:
-    - "tuda_zookeeper"
+    - "zookeeper"
 storm.zookeeper.port: 2181
 # storm.zookeeper.root: "/storm"
 storm.zookeeper.session.timeout: 20000
@@ -59,7 +59,7 @@ storm.health.check.timeout.ms: 5000
 storm.disable.symlinks: false
 
 ### nimbus.* configs are for the master
-nimbus.seeds : ["tuda_storm_nimbus_ui"]
+nimbus.seeds : ["storm-nimbus-ui"]
 nimbus.thrift.port: 6627
 nimbus.thrift.threads: 64
 nimbus.thrift.max_buffer_size: 1048576
@@ -85,7 +85,7 @@ nimbus.worker.heartbeats.recovery.strategy.class: "org.apache.storm.nimbus.TimeO
 nimbus.topology.blobstore.deletion.delay.ms: 300000
 
 ### ui.* configs are for the master
-ui.host: "tuda_storm_nimbus_ui"
+ui.host: "storm-nimbus-ui"
 ui.port: 8081
 ui.title: "Storm UI"
 ui.childopts: "-Xmx768m"
@@ -174,7 +174,7 @@ supervisor.worker.heartbeats.max.timeout.secs: 600
 #For topology configurable heartbeat timeout, maximum allowed heartbeat timeout.
 worker.max.timeout.secs: 600
 supervisor.enable: true
-supervisor.supervisors: ["tuda_supervisor"]
+supervisor.supervisors: ["supervisor"]
 supervisor.supervisors.commands: ["storm supervisor"]
 supervisor.memory.capacity.mb: 4096.0
 #By convention 1 cpu core should be about 100, but this can be adjusted if needed
