@@ -1,4 +1,5 @@
 package org.apache.storm.starter.rulebase.v1;
+
 import org.apache.storm.starter.metric.*;
 
 import java.util.*;
@@ -7,7 +8,7 @@ import java.util.*;
 public class FlowCheck {
 
 
-    private String  topologyName;
+    private String topologyName;
     private int moves;
     private int changes;
     private int cores;
@@ -54,7 +55,7 @@ public class FlowCheck {
             severity.put(key, 0);
             previousRootStats.put(key, new SpoutMetrics(((SpoutMetricsUpdater)spoutMap.get(key).getNode().getComponentUpdater()).getSpoutMetrics()));
         }
-        maxSeverity = 8;
+        maxSeverity = 2;
 
         previousConfig = new RebalanceMove();
         currentConfig = new RebalanceMove();
@@ -224,7 +225,7 @@ public class FlowCheck {
             bolt = queue.poll();
             boltStats = ((BoltMetricsUpdater) bolt.getNode().getComponentUpdater()).getBoltMetrics();
         }
-        while(boltStats.getCapacity() > 0.8 );
+        while(boltStats.getCapacity() > 0.7 );
 
 
     }

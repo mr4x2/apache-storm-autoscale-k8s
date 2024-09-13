@@ -1,17 +1,18 @@
 package org.apache.storm.starter.metric;
+
 import org.apache.storm.generated.BoltAggregateStats;
 import org.apache.storm.generated.CommonAggregateStats;
 import org.apache.storm.generated.ComponentPageInfo;
 import org.apache.storm.generated.ExecutorAggregateStats;
 
-public class BoltMetricsUpdater implements ComponentMetricsUpdaterInterface{
+public class BoltMetricsUpdater implements ComponentMetricsUpdaterInterface {
 
     private BoltMetrics boltMetrics;
     private ComponentMetricsCreator component;
 
-    public BoltMetricsUpdater(ComponentMetricsCreator component) throws Exception{
+    public BoltMetricsUpdater(ComponentMetricsCreator component) throws Exception {
         if (component.getComponentType() != 1)
-            throw  new Exception("Illegal component type " + component.getComponentType());
+            throw new Exception("Illegal component type " + component.getComponentType());
 
         this.component = component;
         boltMetrics = new BoltMetrics(component.getComponentId());
@@ -20,7 +21,7 @@ public class BoltMetricsUpdater implements ComponentMetricsUpdaterInterface{
 
     public void updateMetrics() {
         try {
-            ComponentPageInfo componentPage = component.getClient().getComponentPageInfo(component.getTopologyId(), component.getComponentId(), ":all-time", false);
+            ComponentPageInfo componentPage = component.getClient().getComponentPageInfo(component.getTopologyId(), component.getComponentId(), "600", false);
             boltMetrics.setExecutors(componentPage.get_num_executors());
             boltMetrics.setTasks(componentPage.get_num_tasks());
 
@@ -46,21 +47,21 @@ public class BoltMetricsUpdater implements ComponentMetricsUpdaterInterface{
                 totalTransfered += common.get_transferred();
                 totalExecuted += specific.get_executed();
 
-                avgProcessLatency += specific.get_process_latency_ms()*common.get_acked();
-                avgExecuteLatency += specific.get_execute_latency_ms()*specific.get_executed();
+                avgProcessLatency += specific.get_process_latency_ms() * common.get_acked();
+                avgExecuteLatency += specific.get_execute_latency_ms() * specific.get_executed();
 
                 capacity += specific.get_capacity();
                 maxCapacity = Math.max(maxCapacity, specific.get_capacity());
 
             }
 
-            boltMetrics.setCapacity(capacity/boltMetrics.getExecutors());
+            boltMetrics.setCapacity(capacity / boltMetrics.getExecutors());
             boltMetrics.setMaxCapacity(maxCapacity);
 
-            boltMetrics.setAckedRate((double)(totalAcked - boltMetrics.getAcked()) / (uptime - boltMetrics.getUptime()));
-            boltMetrics.setEmitRate((double)(totalEmitted - boltMetrics.getEmitted()) / (uptime - boltMetrics.getUptime()));
-            boltMetrics.setTransferRate((double)(totalTransfered - boltMetrics.getTransfered()) / (uptime - boltMetrics.getUptime()));
-            boltMetrics.setExecuteRate((double)(totalExecuted - boltMetrics.getExecuted()) / (uptime - boltMetrics.getUptime()));
+            boltMetrics.setAckedRate((double) (totalAcked) / 600);
+            boltMetrics.setEmitRate((double) (totalEmitted) / 600);
+            boltMetrics.setTransferRate((double) totalTransfered / 600);
+            boltMetrics.setExecuteRate((double) (totalExecuted / 600));
 
             boltMetrics.setProcessLatency(avgProcessLatency / totalAcked);
             boltMetrics.setExecuteLatency(avgExecuteLatency / totalExecuted);
@@ -71,8 +72,7 @@ public class BoltMetricsUpdater implements ComponentMetricsUpdaterInterface{
             boltMetrics.setEmitted(totalEmitted);
             boltMetrics.setTransfered(totalTransfered);
             boltMetrics.setExecuted(totalExecuted);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

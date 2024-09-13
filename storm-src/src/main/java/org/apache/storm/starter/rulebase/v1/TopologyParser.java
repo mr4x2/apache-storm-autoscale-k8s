@@ -124,8 +124,6 @@ public class TopologyParser {
     public static void initMetrics() throws Exception {
 
         updateTopology();
-        Thread.sleep(10 * 1000);
-        updateTopology();
 
     }
 
