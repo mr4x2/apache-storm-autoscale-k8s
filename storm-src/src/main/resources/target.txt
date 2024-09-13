@@ -1,1 +1,2 @@
-commit-feed-email 3000
+spout-trigger 3000
+spout-data-iot-data 3000

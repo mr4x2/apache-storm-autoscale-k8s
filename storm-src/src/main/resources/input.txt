@@ -1,3 +1,33 @@
-test-get-metric
-commit-feed-email email-extractor
-email-extractor email-counter
+iot-smarthome
+spout-data-iot-data split-1
+spout-data-iot-data split-5
+spout-data-iot-data split-10
+spout-data-iot-data split-15
+spout-data-iot-data split-20
+spout-data-iot-data split-30
+spout-data-iot-data split-60
+spout-data-iot-data split-120
+split-1 avg-1
+split-5 avg-5
+split-10 avg-10
+split-20 avg-20
+split-30 avg-30
+split-15 avg-15
+split-60 avg-60
+split-120 avg-120
+avg-1 sum-1
+avg-5 sum-5
+avg-10 sum-10
+avg-20 sum-20
+avg-30 sum-30
+avg-15 sum-15
+avg-60 sum-60
+avg-120 sum-120
+avg-1 forecast-1
+avg-5 forecast-5
+avg-10 forecast-10
+avg-20 forecast-20
+avg-30 forecast-30
+avg-15 forecast-15
+avg-60 forecast-60
+avg-120 forecast-120
