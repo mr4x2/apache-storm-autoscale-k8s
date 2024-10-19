@@ -80,7 +80,7 @@ builder.setBolt("wordCount", new CountWord(), 3).fieldsGrouping("split", new Fie
 ### How to run autoscale program
 
 ```cmd
-storm jar /storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.rulebase.v1.TopologyAutoScaleCode input.txt target.txt
+storm jar /storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.rulebase.v1.TopologyParser input.txt target.txt
 ```
 
 ### TODO
@@ -90,3 +90,10 @@ storm jar /storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.rulebase.v1.Topol
 - [ ] Write config to yaml
 - [ ] Smart autoscale
 - [X] Skip autoscale if metric isn't collected
+
+
+Add executor by commandline
+```cmd
+storm rebalance test-get-metric -n 2 -e commit-feed-email=4
+storm rebalance test-get-metric -e commit-feed-email=4
+```
