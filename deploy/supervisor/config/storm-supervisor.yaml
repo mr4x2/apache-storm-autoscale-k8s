@@ -1,10 +1,10 @@
 # Telling the Supervisor where the Zookeeper is.
 storm.zookeeper.servers:
-  - "tuda_zookeeper"
+  - "zookeeper"
 
 # The worker nodes need to know which machine(s) are the candidate of master
 # in order to download the topology jars.
-nimbus.seeds : ["tuda_storm_nimbus_ui"]
+nimbus.seeds : ["nimbus"]
 
 # For each Supervisor, we configure how many workers run on that machine. 
 # Each worker uses a single port for receiving messages, and this setting 
