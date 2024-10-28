@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: supervisor
+  namespace: storm-cluster
   labels:
     app: supervisor
 spec:
@@ -16,4 +17,5 @@ spec:
       resources:
         limits:
           cpu: "4000m"  
-          memory: "4Gi" 
+          memory: "4Gi"
+      command: ["storm", "supervisor"]

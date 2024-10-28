@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: zookeeper
+  namespace: storm-cluster
   labels:
     app: zookeeper
 spec:
@@ -10,6 +11,4 @@ spec:
       image: mr4x2/zookeeper-k8s
       ports:
         - containerPort: 2181
-      resources:
-        limits:
-          cpu: "100m"
+      
