@@ -22,6 +22,7 @@ java.library.path: "/usr/local/lib:/opt/local/lib:/usr/lib:/usr/lib64"
 
 ### storm.* configs are general configurations
 # the local dir is where jars are kept
+storm.local.hostname: "nimbus" 
 storm.local.dir: "storm-local"
 storm.log4j2.conf.dir: "log4j2"
 storm.zookeeper.servers:
