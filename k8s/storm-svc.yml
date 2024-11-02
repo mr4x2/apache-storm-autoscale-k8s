@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nimbus
+  name: nimbus-ui
   namespace: storm-cluster
 spec:
   selector:
@@ -26,6 +26,17 @@ spec:
       port: 8081         # Service port for external access
       targetPort: 8081   # Pod's containerPort for 8081
       nodePort: 30001    # NodePort for external access
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nimbus
+  namespace: storm-cluster
+spec:
+  selector:
+    app: nimbus
+  type: ClusterIP  # Type set to ClusterIP for external access to 6627
+  ports:
     - name: port-6627
       port: 6627         # Service port for internal access
       targetPort: 6627   # Pod's containerPort for 6627

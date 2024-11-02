@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: zookeeper
-          image: mr4x2/zookeeper-k8s
+          image: mr4x2/zookeeper-k8s:v1.1
           ports:
             - containerPort: 2181
 
@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: nimbus
-          image: mr4x2/nimbus-k8s:v.2.4
+          image: mr4x2/nimbus-k8s:v1.1
           ports:
             - containerPort: 8081
             - containerPort: 6627
@@ -67,7 +67,7 @@ spec:
     spec:
       containers:
         - name: supervisor
-          image: mr4x2/supervisor-k8s:v2.2
+          image: mr4x2/zookeeper-k8s:v1.1
           ports:
             - containerPort: 6700
             - containerPort: 6701
