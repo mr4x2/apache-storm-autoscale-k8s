@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-broker
+  namespace: storm-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-broker
+  template:
+    metadata:
+      name: mqtt-broker
+      labels:
+        app: mqtt-broker
+    spec:
+      containers:
+        - name: mqtt-broker
+          image: mr4x2/mqtt-broker
+          ports:
+            - containerPort: 1883
+          resources:
+            limits:
+              cpu: "2000m"  
+              memory: "4Gi"
+

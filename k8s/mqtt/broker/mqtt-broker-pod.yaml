@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mqtt-broker
+  namespace: storm-cluster
+  labels:
+    app: mqtt-broker
+spec:
+  containers:
+    - name: mqtt-broker
+      image: mr4x2/mqtt-broker
+      ports:
+        - containerPort: 1883
+      resources:
+        limits:
+          cpu: "2000m"  
+          memory: "4Gi"
