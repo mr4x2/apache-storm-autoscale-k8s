@@ -1,20 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: storm-cluster
+  name: zookeeper
+  namespace: storm-cluster
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: storm-cluster  # This should match the labels in the template
+      app: zookeeper
   template:
     metadata:
+      name: zookeeper
       labels:
-        app: storm-cluster
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: mr4x2/zookeeper-k8s
+          ports:
+            - containerPort: 2181
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nimbus
+  namespace: storm-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nimbus
+  template:
+    metadata:
+      name: nimbus
+      labels:
+        app: nimbus
     spec:
       containers:
         - name: nimbus
-          image: mr4x2/storm-k8s
+          image: mr4x2/nimbus-k8s:v.2.4
           ports:
             - containerPort: 8081
             - containerPort: 6627
@@ -22,16 +47,27 @@ spec:
             limits:
               cpu: "1000m"  
               memory: "1Gi"
-        - name: zookeeper
-          image: mr4x2/zookeeper-k8s
-          ports:
-            - containerPort: 2181
-          resources:
-            limits:
-              cpu: "1000m"
-              memory: "1Gi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supervisor
+  namespace: storm-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supervisor
+  template:
+    metadata:
+      name: supervisor
+      labels:
+        app: supervisor
+    spec:
+      containers:
         - name: supervisor
-          image: mr4x2/storm-supervisor-k8s
+          image: mr4x2/supervisor-k8s:v2.2
           ports:
             - containerPort: 6700
             - containerPort: 6701
