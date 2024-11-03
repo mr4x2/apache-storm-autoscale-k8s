@@ -6,5 +6,8 @@ nodes:
   - containerPort: 30001
     hostPort: 30001
     listenAddress: "0.0.0.0" # Optional, defaults to "0.0.0.0"
+  - containerPort: 30002
+    hostPort: 30002
+    listenAddress: "0.0.0.0"
 - role: worker
 - role: worker
