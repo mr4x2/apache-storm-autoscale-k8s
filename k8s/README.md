@@ -15,3 +15,9 @@ sizing mqtt broker -> phù hợp, dựng cả cụm monitoring
 
 mkdir -p /mnt/data
 
+
+tìm hiểu tại sao processing time lớn + độ trễ cao
+
+Số spout luôn là 1 thì sẽ ko gây processing cao 
+
+

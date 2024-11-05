@@ -1,6 +1,7 @@
-mqtt:
-  image: nginx
-  volumes:
-   - ./config/mqtt.conf:/etc/nginx/nginx.conf
-  ports:
-   - "1883:1883"
+services:
+  mqtt:
+    image: nginx
+    volumes:
+    - ./config/mqtt.conf:/etc/nginx/nginx.conf
+    ports:
+    - "1883:1883"
