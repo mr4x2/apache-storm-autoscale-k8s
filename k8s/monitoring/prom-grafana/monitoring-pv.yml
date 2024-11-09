@@ -1,0 +1,43 @@
+# Persistent Volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: monitoring-pv
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  hostPath:
+    path: /mnt/monitoring
+
+---
+  # Persistent Volume Claim
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: grafana-pvc
+    namespace: storm-cluster
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: standard
+    resources:
+      requests:
+        storage: 20Gi
+---
+  # Persistent Volume Claim
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: prometheus-pvc
+    namespace: storm-cluster
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: standard
+    resources:
+      requests:
+        storage: 20Gi
