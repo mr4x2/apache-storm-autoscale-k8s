@@ -17,5 +17,17 @@ nodes:
   - containerPort: 30002
     hostPort: 30002
     listenAddress: "0.0.0.0"
+  - containerPort: 30003
+    hostPort: 30003
+    listenAddress: "0.0.0.0"
+  - containerPort: 30004
+    hostPort: 30004
+    listenAddress: "0.0.0.0" # Optional, defaults to "0.0.0.0"
+  - containerPort: 30005
+    hostPort: 30005
+    listenAddress: "0.0.0.0"
+  - containerPort: 30006
+    hostPort: 30006
+    listenAddress: "0.0.0.0"
 - role: worker
 - role: worker
