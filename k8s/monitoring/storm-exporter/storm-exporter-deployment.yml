@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storm-exporter
+  namespace: storm-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storm-exporter
+  template:
+    metadata:
+      name: storm-exporter
+      labels:
+        app: storm-exporter
+    spec:
+      containers:
+        - name: storm-exporter
+          image: mr4x2/stormexporter:v1
+          ports:
+            - containerPort: 8082
+          env:
+            - name: STORM_UI_HOST
+              value: "nimbus-ui:8081"
+            - name: PORT_EXPOSE
+              value: "8082"
+            - name: REFRESH_RATE
+              value: "5"
