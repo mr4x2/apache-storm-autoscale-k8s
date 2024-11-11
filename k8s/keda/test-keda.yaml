@@ -1,0 +1,17 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: storm-supervisor-scaledobject
+  namespace: storm-cluster
+spec:
+  scaleTargetRef:
+    name: supervisor
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.storm-cluster.svc.cluster.local:9090
+        metricName: worker_cluster_used
+        threshold: "3"
+        query: worker_cluster_used{ClusterHost="nimbus-ui:8081"} # Replace with your actual Prometheus query
