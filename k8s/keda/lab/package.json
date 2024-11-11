@@ -1,0 +1,15 @@
+{
+    "name": "worker",
+    "version": "1.0.0",
+    "description": "A RabbitMQ worker application",
+    "main": "worker.js",
+    "scripts": {
+      "start": "node worker.js"
+    },
+    "dependencies": {
+      "amqplib": "^0.10.3"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+  

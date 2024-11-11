@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-worker
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq-worker
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-worker
+    spec:
+      containers:
+      - name: rabbitmq-worker
+        image: mr4x2/worker:latest
+        env:
+        - name: RABBITMQ_HOST
+          value: "rabbitmq.rabbitmq.svc.cluster.local"
+        - name: QUEUE_NAME
+          value: "task_queue"
+        - name: RABBITMQ_USERNAME
+        - name: RABBITMQ_USERNAME
+          value: "user"
+        - name: RABBITMQ_PASSWORD
+          value: "Q7TWyZRjE84AdC8s"

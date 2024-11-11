@@ -1,0 +1,16 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: rabbitmq-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: rabbitmq-worker
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  triggers:
+  - type: rabbitmq
+    metadata:
+      host: amqp://user:Q7TWyZRjE84AdC8s@rabbitmq.rabbitmq.svc.cluster.local:5672/
+      queueName: task_queue
+      queueLength: "5" # Scale when more than 5 messages are in the queue
