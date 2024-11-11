@@ -20,6 +20,9 @@ tìm hiểu tại sao processing time lớn + độ trễ cao
 
 Số spout luôn là 1 thì sẽ ko gây processing cao 
 
+Tăng tất cả task của storm lên -> processing rất cao , không khác gì tăng task của spout, nghi ngờ ko đủ resource để scale
+
+
 
 Ha con mqtt thôi -> xem có tăng tải ko 
 
@@ -27,6 +30,51 @@ Thực ra là con spout nữa
 
 
 -> Tìm hiểu keda
+
+
+
+### Mop triển khai storm k8s
+
+**Tạo k8s cluster**
+
+```cmd
+cd k8s/
+
+kind create cluster --config kind-k8s-cluster.yml
+```
+
+**Install storm**
+
+
+```cmd
+cd k8s/
+
+kubectl create -f storm-ns.yml
+
+kubectl create -f storm-svc.yml
+
+kubectl create -f storm-pv.yml
+
+kubectl create -f storm-pvc.yml
+
+kubectl create -f storm-k8s.yml
+```
+
+create reverse proxy for mqtt broker
+
+```cmd
+
+cd /broker/
+# edit vm ip 
+vim nginx/config/mqtt.conf
+
+cd nginx/
+
+docker compose up -d
+```
+
+
+
 
 
 
