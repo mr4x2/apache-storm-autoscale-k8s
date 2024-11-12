@@ -49,7 +49,7 @@ services:
       - 8081:8081
 
   storm-exporter:
-    image: mr4x2/stormexporter:v1.2
+    image: mr4x2/stormexporter:v1.2.1
     container_name: storm-exporter
     environment:
       - STORM_UI_HOST=ui:8081
