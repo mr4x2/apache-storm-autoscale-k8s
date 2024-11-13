@@ -175,7 +175,7 @@ supervisor.worker.heartbeats.max.timeout.secs: 600
 #For topology configurable heartbeat timeout, maximum allowed heartbeat timeout.
 worker.max.timeout.secs: 600
 supervisor.enable: true
-supervisor.supervisors: ["supervisor"]
+supervisor.supervisors: ["supervisor-0.supervisor-dns.storm-cluster.svc.cluster.local","supervisor-1.supervisor-dns.storm-cluster.svc.cluster.local","supervisor-2.supervisor-dns.storm-cluster.svc.cluster.local"]
 supervisor.supervisors.commands: ["storm supervisor"]
 supervisor.memory.capacity.mb: 4096.0
 #By convention 1 cpu core should be about 100, but this can be adjusted if needed
@@ -191,7 +191,7 @@ supervisor.thrift.max_buffer_size: 1048576
 supervisor.thrift.socket.timeout.ms: 5000
 
 ### worker.* configs are for task workers
-worker.heap.memory.mb: 768
+worker.heap.memory.mb: 1024
 worker.childopts: "-Xmx%HEAP-MEM%m -XX:+IgnoreUnrecognizedVMOptions -XX:+PrintGCDetails -Xloggc:artifacts/gc.log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=1M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=artifacts/heapdump"
 worker.gc.childopts: ""
 

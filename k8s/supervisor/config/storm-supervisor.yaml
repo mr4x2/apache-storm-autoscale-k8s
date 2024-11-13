@@ -10,6 +10,7 @@ nimbus.seeds : ["nimbus"]
 # Each worker uses a single port for receiving messages, and this setting 
 # defines which ports are open for use. We define four ports here, so Storm will 
 # allocate up to four workers to run on this node.
+supervisor.supervisors: ["supervisor-0.supervisor-dns.storm-cluster.svc.cluster.local","supervisor-1.supervisor-dns.storm-cluster.svc.cluster.local","supervisor-2.supervisor-dns.storm-cluster.svc.cluster.local"]
 supervisor.slots.ports:
     - 6700
     - 6701
