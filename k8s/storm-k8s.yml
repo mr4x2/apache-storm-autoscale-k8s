@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: nimbus
-          image: mr4x2/nimbus-k8s:v1.1
+          image: mr4x2/nimbus-k8s:v2.1
           ports:
             - containerPort: 8081
             - containerPort: 6627
@@ -50,12 +50,13 @@ spec:
 
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: supervisor
   namespace: storm-cluster
 spec:
   replicas: 1
+  serviceName: "supervisor-dns"
   selector:
     matchLabels:
       app: supervisor
@@ -67,7 +68,7 @@ spec:
     spec:
       containers:
         - name: supervisor
-          image: mr4x2/supervisor-k8s:v1.1
+          image: mr4x2/supervisor-k8s:v2.1
           ports:
             - containerPort: 6700
             - containerPort: 6701
