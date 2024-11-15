@@ -2,3 +2,4 @@
 target/
 venv/
 *.jar
+__pycache__/
