@@ -13,9 +13,6 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus.storm-cluster.svc.cluster.local:9090
-        metricName: worker_utilization_ratio
-        threshold: "0.7"
-        query:
-          (worker_cluster_used{ClusterHost="nimbus-ui:8081"})
-          /
-          (worker_cluster_total{ClusterHost="nimbus-ui:8081"}) # Replace with your actual Prometheus query
+        metricName: worker_cluster_used
+        threshold: "3"
+        query: worker_cluster_used{ClusterHost="nimbus-ui:8081"}

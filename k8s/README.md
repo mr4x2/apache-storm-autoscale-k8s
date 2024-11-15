@@ -20,7 +20,11 @@ tìm hiểu tại sao processing time lớn + độ trễ cao
 
 Số spout luôn là 1 thì sẽ ko gây processing cao 
 
-Tăng tất cả task của storm lên -> processing rất cao , không khác gì tăng task của spout, nghi ngờ ko đủ resource để scale
+Tăng tất cả task của storm lên -> processing rất cao , không khác gì tăng task của spout, nghi ngờ ko đủ resource để scale -> scale đủ worker thì oke luôn
+
+
+mr4x2/nimbus-k8s:v1.2.2, worker tăng thêm -> giảm latency
+
 
 
 
@@ -29,7 +33,9 @@ Ha con mqtt thôi -> xem có tăng tải ko
 Thực ra là con spout nữa
 
 
--> Tìm hiểu keda
+-> Tìm hiểu keda -> oke
+
+
 
 
 
