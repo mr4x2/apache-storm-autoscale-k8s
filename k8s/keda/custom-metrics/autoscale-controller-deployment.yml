@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keda-controller
+  namespace: storm-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keda-controller
+  template:
+    metadata:
+      name: keda-controller
+      labels:
+        app: keda-controller
+    spec:
+      containers:
+        - name: keda-controller
+          image: mr4x2/keda-controller:v1
+          ports:
+            - containerPort: 8001
+          env:
+            - name: NIMBUS_HOST
+              value: "nimbus-ui:8081"
+            - name: PROMETHEUS_HOST
+              value: "http://prometheus:9090"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: storm-cluster
+  name: keda-controller
+spec:
+  type: ClusterIP
+  selector: 
+    app: keda-controller
+  ports:
+    - port: 8001
+      targetPort: 8001
