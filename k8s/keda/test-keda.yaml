@@ -13,6 +13,7 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus.storm-cluster.svc.cluster.local:9090
-        metricName: worker_cluster_used
-        threshold: "3"
-        query: worker_cluster_used{ClusterHost="nimbus-ui:8081"}
+        metricName: weight_scale
+        threshold: "0.75"
+        query: weight_scale{ClusterHost="nimbus-ui:8081"}
+
