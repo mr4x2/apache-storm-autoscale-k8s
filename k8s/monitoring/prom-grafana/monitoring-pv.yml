@@ -14,30 +14,30 @@ spec:
     path: /mnt/monitoring
 
 ---
-  # Persistent Volume Claim
-  apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: grafana-pvc
-    namespace: storm-cluster
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: standard
-    resources:
-      requests:
-        storage: 20Gi
+# Persistent Volume Claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: storm-cluster
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 20Gi
 ---
-  # Persistent Volume Claim
-  apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: prometheus-pvc
-    namespace: storm-cluster
-  spec:
-    accessModes:
-      - ReadWriteOnce
-    storageClassName: standard
-    resources:
-      requests:
-        storage: 20Gi
+# Persistent Volume Claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-pvc
+  namespace: storm-cluster
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 20Gi
