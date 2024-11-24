@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: storm-exporter
-          image: mr4x2/stormexporter:v1.2.1
+          image: mr4x2/stormexporter:v1.2.5
           ports:
             - containerPort: 8082
           env:
