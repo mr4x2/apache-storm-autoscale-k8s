@@ -11,6 +11,7 @@ spec:
   maxReplicaCount: 3
   triggers:
     - type: prometheus
+      metricType: Value
       metadata:
         serverAddress: http://prometheus.storm-cluster.svc.cluster.local:9090
         metricName: weight_scale
