@@ -24,15 +24,15 @@ spec:
           volumeMounts:
             - mountPath: /etc/prometheus
               name: prom-conf
-            - mountPath: /prometheus
-              name: monitoring-vol
+            - mountPath: /prometheus/
+              name: prometheus-pvc
       volumes:
         - name: prom-conf
           configMap: 
             name: prom-conf
-        - name: monitoring-vol
-          persistentVolumeClaim:
-            claimName: prometheus-pvc
+        - name: prometheus-pvc
+          emptyDir: {}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -65,8 +65,8 @@ spec:
           configMap: 
             name: datasources-conf
         - name: monitoring-vol
-          persistentVolumeClaim:
-            claimName: grafana-pvc
+          emptyDir: {}
+          
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -138,7 +138,7 @@ spec:
     spec:
       containers:
         - name: storm-exporter
-          image: mr4x2/stormexporter:v1.2.1
+          image: mr4x2/stormexporter:v1.2.5
           ports:
             - containerPort: 8082
           env:
