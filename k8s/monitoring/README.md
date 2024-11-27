@@ -34,7 +34,8 @@ Add ip node which is worker node or master node to config map
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     static_configs:
       - targets:
-          - 10.1.0.90:10250  # Replace with your actual target IP and port
+          - 172.18.0.3:10250
+          - 172.18.0.2:10250  # Replace with your actual target IP and port
 
   - job_name: 'kubelet-static-cadvisor'
     scheme: https
@@ -44,7 +45,8 @@ Add ip node which is worker node or master node to config map
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     static_configs:
       - targets:
-          - 10.1.0.90:10250
+          - 172.18.0.3:10250
+          - 172.18.0.2:10250
 ```
 
 create a pod to curl show metrics
