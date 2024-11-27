@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: metrics-scraper
+  namespace: storm-cluster
+spec:
+  serviceAccount: prometheus-metrics-scraper-sa
+  containers:
+  - command:
+    - tail
+    - -f
+    - /dev/null
+    image: alpine/curl
+    name: metrics-scraper
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always

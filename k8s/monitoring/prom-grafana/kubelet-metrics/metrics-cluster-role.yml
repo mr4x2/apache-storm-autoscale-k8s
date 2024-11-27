@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: metrics-role
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes/metrics
+  - nodes/stats
+  verbs: ["get"]
