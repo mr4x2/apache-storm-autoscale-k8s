@@ -1,0 +1,37 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: keda-hpa-storm-supervisor-scaledobject
+  namespace: storm-cluster
+spec:
+  scaleTargetRef:
+    kind: StatefulSet
+    name: supervisor
+    apiVersion: apps/v1
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: s0-prometheus
+          selector:
+            matchLabels:
+              scaledobject.keda.sh/name: storm-supervisor-scaledobject
+        target:
+          type: Value
+          value: 750m
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 300
+      selectPolicy: Max
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
+    scaleDown:
+      selectPolicy: Disabled
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15

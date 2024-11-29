@@ -8,7 +8,8 @@ spec:
     name: supervisor
     kind: StatefulSet
   minReplicaCount: 1
-  maxReplicaCount: 5
+  maxReplicaCount: 7
+  initialCooldownPeriod: 300
   triggers:
     - type: prometheus
       metricType: Value
