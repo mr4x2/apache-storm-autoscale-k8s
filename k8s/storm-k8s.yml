@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: nimbus
-          image: mr4x2/nimbus-k8s:v2.1
+          image: mr4x2/nimbus-k8s:test-3-worker-node-2-workers
           ports:
             - containerPort: 8081
             - containerPort: 6627

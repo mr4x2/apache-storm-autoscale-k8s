@@ -37,8 +37,8 @@ public class FlowCheck {
         moves = 0;
         changes = 0;
         cores = 2;
-        workers = 1;
-        maxWorkers = 8;
+        workers = 2;
+        maxWorkers = 28;
 
         this.spoutMap = spoutMap;
         this.boltMap = boltMap;
