@@ -207,7 +207,7 @@ public class FlowCheck {
         }
 
 
-        //iterate through the queue while the capacity is greater than 0.8
+        //iterate through the queue while the capacity is greater than 0.7
         //if none of the bolts have capacity problem then we add a thread to the bolt with the biggest one (prediction that there is a [potential bottleneck)
         ComponentNode bolt = queue.poll();
         BoltMetrics boltStats = ((BoltMetricsUpdater) bolt.getNode().getComponentUpdater()).getBoltMetrics();
