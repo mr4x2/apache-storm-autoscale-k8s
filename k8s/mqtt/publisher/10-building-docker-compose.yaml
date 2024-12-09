@@ -1,0 +1,70 @@
+services:
+  building_1:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-1
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_0} -b ${HOST_NAME} -s ${SPEED}"
+
+  building_2:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-2
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_1} -b ${HOST_NAME} -s ${SPEED}"
+
+  building_3:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-3
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_2} -b ${HOST_NAME} -s ${SPEED}"
+
+  building_4:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-4
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_3} -b ${HOST_NAME} -s ${SPEED}"
+
+  building_5:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-5
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_4} -b ${HOST_NAME} -s ${SPEED}"
+  
+  building_6:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-6
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_5} -b ${HOST_NAME} -s ${SPEED}"
+  
+  building_7:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-7
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_6} -b ${HOST_NAME} -s ${SPEED}"
+  
+  building_8:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-8
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_7} -b ${HOST_NAME} -s ${SPEED}"
+
+  building_9:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-9
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_8} -b ${HOST_NAME} -s ${SPEED}"
+  
+  building_10:
+    image: mr4x2/mqtt-publisher:v1
+    container_name: mqtt-publisher-building-10
+    volumes:
+      - /mnt/iot-data:/app/data-5-house
+    command: "node index.js -f data-5-house/${CSV_FILE_9} -b ${HOST_NAME} -s ${SPEED}"
