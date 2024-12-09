@@ -30,8 +30,9 @@ spec:
           value: 1
           periodSeconds: 300
     scaleDown:
-      selectPolicy: Disabled
+      stabilizationWindowSeconds: 300
+      selectPolicy: Max
       policies:
         - type: Pods
           value: 1
-          periodSeconds: 15
+          periodSeconds: 300
