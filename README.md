@@ -19,7 +19,5 @@ storm jar Storm-IOTdata-1.0-SNAPSHOT-jar-with-dependencies.jar com.storm.iotdata
 ### TODO
 
 **This is todo list must be done**
-
-- [ ] Write config to yaml
 - [X] Smart autoscale
 - [X] Skip autoscale if metric isn't collected
