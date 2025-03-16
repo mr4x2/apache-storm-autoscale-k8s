@@ -4,3 +4,4 @@ venv/
 *.jar
 __pycache__/
 .env
+.vscode/
