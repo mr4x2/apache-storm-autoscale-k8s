@@ -11,13 +11,15 @@ services:
   nimbus:
     image: storm
     container_name: nimbus
-    command: storm nimbus
+    command: sh -c "storm nimbus & storm ui"
     volumes:
       - ./config/storm-nimbus.yaml:/conf/storm.yaml
+      - ./storm-src/target/storm-src-1.0-SNAPSHOT.jar:/opt/storm/lib/storm-autoscale-1.0.jar
+      - ./storm-src/target/Storm-IOTdata-1.0-SNAPSHOT-jar-with-dependencies.jar:/opt/storm/lib/Storm-IOTdata-1.0.jar
+    ports:
+      - 8081:8081
     networks:
       storm_network:
-    # TODO: add more node to make nimbus HA
-
 
   supervisor:
     image: storm
@@ -37,22 +39,33 @@ services:
     networks:
       storm_network:
 
-  ui:
-    image: storm
-    container_name: ui
-    command: storm ui
-    volumes:
-      - ./config/storm-nimbus.yaml:/conf/storm.yaml
+  mqtt-broker:
+    image: mr4x2/mqtt-broker-iotdata:v1
+    container_name: mqtt-broker
     networks:
       storm_network:
     ports:
-      - 8081:8081
+      - 1883:1883
+  
+  mysql:
+    image: mysql:8.4.2
+    command: --mysql-native-password=ON
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Uet123
+      MYSQL_DATABASE: iotdata
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: Uet123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      storm_network:
 
   storm-exporter:
     image: mr4x2/stormexporter:v1.2.5
     container_name: storm-exporter
     environment:
-      - STORM_UI_HOST=ui:8081
+      - STORM_UI_HOST=nimbus:8081
       - PORT_EXPOSE=8082
       - REFRESH_RATE=5
     networks:
@@ -60,7 +73,7 @@ services:
     ports:
       - 8082:8082
     depends_on:
-      - ui
+      - nimbus
     # TODO: update health check with depend on to avoid fail in run container
 
 # TODO: add log with fluentd to get log from supervisor
@@ -68,3 +81,6 @@ services:
 networks:
   storm_network:
     driver: bridge
+
+volumes:
+  mysql_data:
