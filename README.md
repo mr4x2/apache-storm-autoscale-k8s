@@ -23,5 +23,5 @@ storm jar Storm-IOTdata-1.0.jar com.storm.iotdata.MainTopo
 ```cmd
 docker exec -it nimbus bash
 cd /opt/storm/lib/
-storm jar storm-src-1.0-SNAPSHOT.jar org.apache.storm.starter.rulebase.v1.TopologyParser input.txt target.txt
+storm jar storm-autoscale-1.0.jar org.apache.storm.starter.rulebase.v1.TopologyParser input.txt target.txt
 ```
