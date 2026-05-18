@@ -51,6 +51,7 @@ Two autoscaling mechanisms run simultaneously:
 | [`docs/deployment-k8s.md`](docs/deployment-k8s.md) | K8s deployment steps, KEDA setup, custom images |
 | [`docs/monitoring.md`](docs/monitoring.md) | storm-exporter metrics, Prometheus queries, Grafana |
 | [`docs/related-projects.md`](docs/related-projects.md) | Full details on stormsmarthome and storm_exporter_prometheus |
+| [`docs/aristo-versions.md`](docs/aristo-versions.md) | Aristo v1–v4 diff table + exact changes made to v1 for this repo |
 
 ## Key Files
 

@@ -26,6 +26,7 @@ MQTT Publisher → MQTT Broker → Storm Topology → MySQL
 | [Docker Compose Guide](docs/deployment-docker.md) | Local development setup |
 | [Kubernetes Guide](docs/deployment-k8s.md) | K8s deployment, KEDA setup, custom images |
 | [Related Projects](docs/related-projects.md) | Core topology repo and Prometheus exporter repo details |
+| [Aristo Versions](docs/aristo-versions.md) | Aristo v1–v4 algorithm diff + modifications made to v1 for this repo |
 
 ## Quick Start (Local with Docker Compose)
 
