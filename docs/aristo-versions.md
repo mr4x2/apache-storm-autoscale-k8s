@@ -6,6 +6,24 @@ This document covers what changed across Aristo's four `rulebased` versions and 
 
 ---
 
+## Implementation Status
+
+### Done
+- [x] `rulebase/aristo/` package — all 7 classes ported and committed on `research/aristo-comparison` branch
+  - `TopologyParser`, `FlowCheck`, `RebalanceMove`, `ComponentNode`, `BoltMetricsComparator`, `OutputWriter`, `TopologyConfiguration`
+- [x] `docs/aristo-versions.md` — v1–v4 diff tables, modification notes, metrics plan, experiment designs
+- [x] Maven build — `mvn package` now produces two fat JARs:
+  - `target/storm-autoscale-v1-1.0.jar` (entry: `rulebase.v1.TopologyParser`)
+  - `target/storm-autoscale-aristo-1.0.jar` (entry: `rulebase.aristo.TopologyParser`)
+
+### Not Done
+- [ ] **Add `OutputWriter` to `rulebase/v1/`** — the existing modified v1 currently has no output logging. For a fair comparison both versions must write the same structured records. See Option 1 in [Metrics Collection Plan](#metrics-collection-plan) below.
+- [ ] **Run Experiment A** — execute both JARs under identical load, collect Prometheus + OutputWriter data, compare throughput / latency / rebalance count / time-to-stabilize.
+- [ ] **Experiment B** (future) — full system comparison: modified v1 + KEDA vs original Aristo v1 executor-only (no KEDA). See [Experiment B](#experiment-b--full-system-comparison-future) below.
+- [ ] **Option 2** (future fallback) — if OutputWriter integration is skipped, fall back to Prometheus-only collection with manual graph reading.
+
+---
+
 ## Version Comparison
 
 ### v1 → v2
