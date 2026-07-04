@@ -27,7 +27,7 @@ Total new runs: 39 × ~45 min (run + reset) ≈ **29 h** of cluster time.
 
 - [x] Create GKE Standard cluster (3–5 × `e2-standard-4`, cluster-autoscaler max 8 nodes)
 - [x] Create GCE VM (`e2-medium` + 50 GB persistent disk) for MQTT publisher + DEBS dataset
-- [ ] Apply K8s manifests in order:
+- [X] Apply K8s manifests in order:
   ```bash
   kubectl create -f k8s/storm-ns.yml
   kubectl create -f k8s/storm-svc.yml
