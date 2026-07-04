@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "description": "Data contract for DynamiX autoscaling experiments (Groups 1-3). Every run MUST emit these three CSVs. Column names, units, and dtypes are fixed so that dynamix_analysis.py and dynamix_plots.py consume the files without modification.",
+  "conditions": ["static", "keda_only", "aristo_only", "dynamix"],
+  "groups": {
+    "G1": "4-condition baseline comparison (static | keda_only | aristo_only | dynamix)",
+    "G2": "ARiSto throughput-formula ablation (aristo_orig_v1 | aristo_mod_v1)",
+    "G3": "Parameter sensitivity sweeps (window_s | wscale_threshold | bolt_cap_threshold)"
+  },
+  "files": {
+    "timeseries": {
+      "filename_pattern": "timeseries_{run_id}.csv",
+      "sample_period_s": 15,
+      "primary_key": ["run_id", "t_s"],
+      "columns": [
+        {"name": "run_id",                  "dtype": "str",   "unit": null,       "source": "assigned per run (see run_metadata)"},
+        {"name": "condition",               "dtype": "str",   "unit": null,       "source": "one of conditions[] (G1) or aristo_orig_v1/aristo_mod_v1 (G2) or dynamix (G3)"},
+        {"name": "group",                   "dtype": "str",   "unit": null,       "source": "G1|G2|G3"},
+        {"name": "t_s",                     "dtype": "int",   "unit": "s",        "source": "seconds since load-driver start (0-aligned across replicates)"},
+        {"name": "offered_load_msgs_per_s", "dtype": "float", "unit": "msg/s",    "source": "load driver setpoint (MQTT publish rate) at time t"},
+        {"name": "throughput_acked_per_s",  "dtype": "float", "unit": "tuple/s",  "source": "PromQL: sum(rate(storm_topology__acked[1m])) -- fully-acked tuples/s across the topology"},
+        {"name": "emitted_per_s",           "dtype": "float", "unit": "tuple/s",  "source": "PromQL: sum(rate(storm_topology__emitted[1m]))"},
+        {"name": "complete_latency_ms",     "dtype": "float", "unit": "ms",       "source": "PromQL: storm_topology__complete_latency (spout complete-latency, tuple-tree end-to-end)"},
+        {"name": "capacity_max_bolt",       "dtype": "float", "unit": "ratio",    "source": "PromQL: max(storm_topology__capacity) over bolts -- Storm capacity of the hottest bolt (0..1+)"},
+        {"name": "executors_total",         "dtype": "int",   "unit": "count",    "source": "Storm REST /api/v1/topology/:id -> sum of executors, OR PromQL storm_topology__executors"},
+        {"name": "workers_total",           "dtype": "int",   "unit": "count",    "source": "Storm REST topology summary -> workersTotal"},
+        {"name": "supervisor_pods",         "dtype": "int",   "unit": "count",    "source": "kubectl get pods -l app=supervisor --field-selector=status.phase=Running -o name | wc -l  (== Running replicas of the Supervisor StatefulSet)"},
+        {"name": "weight_scale",            "dtype": "float", "unit": "score",    "source": "computed metric 0.6*worker_util_ratio + 0.2*bolt_capacity + 0.2*latency_norm (ARiSto/KEDA trigger). Null for static."},
+        {"name": "cpu_util_ratio",          "dtype": "float", "unit": "ratio",    "source": "PromQL: avg over supervisor pods of rate(container_cpu_usage_seconds_total)/pod_cpu_limit (optional; null if not collected)"}
+      ]
+    },
+    "rebalance_events": {
+      "filename_pattern": "rebalance_{run_id}.csv",
+      "primary_key": ["run_id", "t_s", "layer", "component"],
+      "note": "One row per scaling action. ARiSto rows come from the autoscaler OutputWriter log (topology rebalance); KEDA rows come from kubectl events / KEDA operator log (pod scale). Empty file (header only) is valid for the static condition.",
+      "columns": [
+        {"name": "run_id",     "dtype": "str",   "unit": null,     "source": "assigned per run"},
+        {"name": "condition",  "dtype": "str",   "unit": null,     "source": "as above"},
+        {"name": "group",      "dtype": "str",   "unit": null,     "source": "G1|G2|G3"},
+        {"name": "t_s",        "dtype": "int",   "unit": "s",      "source": "seconds since load-driver start"},
+        {"name": "layer",      "dtype": "str",   "unit": null,     "source": "aristo (topology-level) | keda (infrastructure-level)"},
+        {"name": "action",     "dtype": "str",   "unit": null,     "source": "scale_out | scale_in"},
+        {"name": "component",  "dtype": "str",   "unit": null,     "source": "for aristo: bolt/spout component id; for keda: 'supervisor'"},
+        {"name": "from_count", "dtype": "int",   "unit": "count",  "source": "parallelism/pod count before the action"},
+        {"name": "to_count",   "dtype": "int",   "unit": "count",  "source": "parallelism/pod count after the action"},
+        {"name": "trigger_value","dtype":"float","unit": "score",  "source": "weight_scale (or per-signal value) that fired the action; null if unavailable"}
+      ]
+    },
+    "run_metadata": {
+      "filename_pattern": "run_metadata.csv",
+      "note": "One row per run_id (append across all runs of the campaign). Single shared file for the whole campaign.",
+      "primary_key": ["run_id"],
+      "columns": [
+        {"name": "run_id",         "dtype": "str",  "unit": null,  "source": "e.g. G1-dynamix-r1"},
+        {"name": "group",          "dtype": "str",  "unit": null,  "source": "G1|G2|G3"},
+        {"name": "condition",      "dtype": "str",  "unit": null,  "source": "condition label"},
+        {"name": "replicate",      "dtype": "int",  "unit": null,  "source": "1..n"},
+        {"name": "params_json",    "dtype": "str",  "unit": null,  "source": "JSON: {\"window_s\":600,\"wscale_threshold\":0.75,\"bolt_cap_threshold\":0.7,\"aristo_jar\":\"...\",\"keda_enabled\":true,\"cooldown_s\":300}"},
+        {"name": "load_profile",   "dtype": "str",  "unit": null,  "source": "e.g. ramp_1k_4k_8k_10min"},
+        {"name": "warmup_s",       "dtype": "int",  "unit": "s",   "source": "leading window discarded from steady-state stats (default 120)"},
+        {"name": "cluster_spec",   "dtype": "str",  "unit": null,  "source": "JSON: node count, vCPU, RAM, k8s version, storm version"},
+        {"name": "aristo_jar",     "dtype": "str",  "unit": null,  "source": "storm-autoscale-v1-1.0.jar | storm-autoscale-aristo-1.0.jar | none"},
+        {"name": "start_iso",      "dtype": "str",  "unit": "ISO8601", "source": "run start timestamp"},
+        {"name": "end_iso",        "dtype": "str",  "unit": "ISO8601", "source": "run end timestamp"},
+        {"name": "notes",          "dtype": "str",  "unit": null,  "source": "free text"}
+      ]
+    }
+  },
+  "load_profile_default": {
+    "name": "ramp_1k_4k_8k_10min",
+    "steps": [
+      {"level": 1, "offered_load_msgs_per_s": 1000, "duration_s": 600},
+      {"level": 2, "offered_load_msgs_per_s": 4000, "duration_s": 600},
+      {"level": 3, "offered_load_msgs_per_s": 8000, "duration_s": 600}
+    ],
+    "total_duration_s": 1800,
+    "warmup_discard_s": 120
+  },
+  "baseline_params": {"window_s": 600, "wscale_threshold": 0.75, "bolt_cap_threshold": 0.7, "cooldown_s": 300},
+  "sweeps_G3": {
+    "window_s":           [300, 600, 900, 1200],
+    "wscale_threshold":   [0.65, 0.75, 0.85],
+    "bolt_cap_threshold": [0.6, 0.7, 0.8]
+  }
+}

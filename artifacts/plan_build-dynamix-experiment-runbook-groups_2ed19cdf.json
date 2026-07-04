@@ -1,0 +1,50 @@
+{
+  "version": 3,
+  "created_at": "2026-07-04T17:24:47.627Z",
+  "task_summary": "Build DynamiX experiment runbook (Groups 1–3) + analysis/plotting scaffold",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Plan",
+      "delegations": [
+        {
+          "steps": [
+            {
+              "title": "Define the metrics data contract",
+              "description": "Write metrics_schema.md and a machine-readable schema (metrics_schema.json) fixing the exact CSV layout every run must emit so the runbook and analysis code agree. Cover: (a) a per-condition time-series CSV (columns: timestamp, condition, run_id, throughput_acked_per_s, complete_latency_ms, supervisor_pods, executors_total, workers_total, weight_scale, offered_load_msgs_per_s); (b) a rebalance-events CSV (timestamp, condition, run_id, layer[aristo|keda], action[scale_out|scale_in], component, from, to); (c) a run-metadata CSV (run_id, condition, group, params JSON, cluster spec, start/end). Map each column to its source (Prometheus query string, OutputWriter log field, kubectl). This is the interface the plotting code consumes."
+            },
+            {
+              "title": "Write Group 1 runbook (4-condition baseline, P0)",
+              "description": "In runbook.md, a Group 1 section giving copy-paste-level steps to run Static / KEDA-only / ARiSto-only / DynamiX. For each: exactly what to enable/disable (autoscaler JAR present/absent, KEDA ScaledObject applied/deleted, fixed executor counts for Static), the ramped MQTT load driver (1000→4000→8000 msg/s, 10 min/level), warm-up/discard window, replicate count (n=3), and the Prometheus/kubectl commands that populate the Step-1 CSVs. State the core claim this tests and the exact figures/tables it feeds."
+            },
+            {
+              "title": "Write Group 2 + Group 3 runbook sections",
+              "description": "Group 2: original ARiSto v1 (storm-autoscale-aristo-1.0.jar) vs modified v1 (storm-autoscale-v1-1.0.jar) under identical load, isolating the window-throughput enhancement; note it reuses the Group 1 harness with KEDA fixed. Group 3: parameter sweeps — observation window {300,600,900,1200 s}, weight_scale threshold {0.65,0.75,0.85}, bolt-capacity threshold {0.6,0.7,0.8} — one parameter varied at a time from the 600/0.75/0.7 baseline, with a config-injection recipe (env vars / ConfigMap) and the metrics recorded (throughput stability = CoV, rebalance frequency). Include a master run-matrix table enumerating every run_id."
+            },
+            {
+              "title": "Build the analysis module (load + derive metrics)",
+              "description": "Write dynamix_analysis.py: robust loaders that validate incoming CSVs against the Step-1 schema, plus metric-derivation functions — per-condition mean/CoV throughput, p50/p95/p99 latency, settling time after each load step (time to return within ±5% of post-step steady state), rebalance frequency, pod-count trajectory, and a stability score. Functions return tidy DataFrames and write summary tables (group1_summary.csv, group2_summary.csv, group3_summary.csv). Pure functions, no plotting, so results can be unit-checked."
+            },
+            {
+              "title": "Build the plotting module (publication figures)",
+              "description": "Load the figure-style skill and apply_figure_style() first. Write dynamix_plots.py producing Section V figures: (F1) throughput-vs-time overlay of the 4 conditions with load-step shading; (F2) latency CDF / p95 bar per condition; (F3) supervisor-pod-count + executor trajectory over the ramp; (F4) settling-time and rebalance-count grouped bars; (F5) Group 2 modified-vs-original throughput overlay; (F6) Group 3 sensitivity line plots (throughput stability & rebalance freq vs each swept parameter). Every figure saved at 300 dpi PNG via fig.savefig, English labels only."
+            },
+            {
+              "title": "Generate synthetic data and validate end-to-end",
+              "description": "Write make_synthetic_runs.py that emits schema-conformant CSVs for all conditions/groups with plausible dynamics (DynamiX recovers fastest/steadiest, Static saturates, single-layer intermediate) purely to exercise the pipeline — clearly labelled SYNTHETIC/placeholder. Run the analysis + plotting modules on it so every figure and summary table renders now, proving the scaffold works the moment real logs arrive. Embed the rendered figures inline."
+            },
+            {
+              "title": "Assemble runbook bundle and save artifacts",
+              "description": "Consolidate: runbook.md (Groups 1–3 + run matrix + metrics contract cross-ref), metrics_schema.md/.json, dynamix_analysis.py, dynamix_plots.py, make_synthetic_runs.py, the synthetic CSVs, generated summary tables, and all figures. Save each as artifacts (Python-generated and text separately). Close with a short README mapping each review-log P0/P1/P2 item to the runbook section and figure that discharges it, so the plan traces directly back to anh Tú's comments."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    }
+  ],
+  "feasibility": {
+    "rationale": "All three experiment groups are fully specified in the Notion review log, and the metric sources (Prometheus spouts_acked/complete_latency, OutputWriter rebalance logs, kubectl pod counts) are known from the draft and thesis. The runbook and analysis code can be written and validated now against synthetic data matching the expected schema; the only thing that must wait is the real runs. Environment note: the persistent Python kernel has a host dylib issue, so plotting may run via bash python — same libraries, verified to work.",
+    "confidence": "high"
+  }
+}

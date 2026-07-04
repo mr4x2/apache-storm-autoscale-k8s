@@ -52,6 +52,9 @@ Two autoscaling mechanisms run simultaneously:
 | [`docs/monitoring.md`](docs/monitoring.md) | storm-exporter metrics, Prometheus queries, Grafana |
 | [`docs/related-projects.md`](docs/related-projects.md) | Full details on stormsmarthome and storm_exporter_prometheus |
 | [`docs/aristo-versions.md`](docs/aristo-versions.md) | Aristo v1–v4 diff table + exact changes made to v1 for this repo |
+| [`docs/experiments.md`](docs/experiments.md) | DynamiX paper experiment checklist (Group 1/2/3), runnable commands, PromQL, results tables, analysis pipeline + figure map |
+| [`docs/metrics-schema.md`](docs/metrics-schema.md) | Data contract for experiment-run CSVs (columns, real PromQL, validation); JSON twin `docs/metrics-schema.json` |
+| [`analysis/README.md`](analysis/README.md) | Analysis/plotting scripts that turn run CSVs into Section V summary tables + figures F1–F6 |
 
 ## Key Files
 
