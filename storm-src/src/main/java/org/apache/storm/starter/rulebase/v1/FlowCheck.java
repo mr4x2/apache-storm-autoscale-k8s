@@ -2,6 +2,7 @@ package org.apache.storm.starter.rulebase.v1;
 import org.apache.storm.starter.metric.*;
 
 import java.util.*;
+import java.util.ArrayList;
 
 
 public class FlowCheck {
@@ -26,7 +27,18 @@ public class FlowCheck {
     private RebalanceMove previousConfig;
     private RebalanceMove currentConfig;
 
+    private List<TopologyConfiguration> previousConfigs;
+    private List<Double> histThroughput;
+    private List<Double> histLatency;
+    private Double avgThroughput;
+    private Double avgLatency;
+    private int count;
+
     private boolean rebalanced;
+
+    private long start, stop;
+    private OutputWriter writer;
+    private TopologyConfiguration conf;
 
 
 
@@ -59,7 +71,23 @@ public class FlowCheck {
         previousConfig = new RebalanceMove();
         currentConfig = new RebalanceMove();
 
+        previousConfigs = new ArrayList<>();
+        Map<String, BoltMetrics> initBoltStats = new HashMap<>();
+        for (String key : boltMap.keySet())
+            initBoltStats.put(key, ((BoltMetricsUpdater) boltMap.get(key).getNode().getComponentUpdater()).getBoltMetrics());
+        conf = new TopologyConfiguration(workers, previousRootStats, initBoltStats);
+        previousConfigs.add(conf);
+
+        histThroughput = new ArrayList<>();
+        histLatency = new ArrayList<>();
+        avgThroughput = 0d;
+        avgLatency = 0d;
+        count = 0;
+
         rebalanced = false;
+
+        start = System.currentTimeMillis();
+        writer = new OutputWriter(topologyName);
     }
 
 
@@ -91,9 +119,28 @@ public class FlowCheck {
         previousConfig = currentConfig;
         currentConfig = new RebalanceMove();
 
+        stop = System.currentTimeMillis();
+        try {
+            writer.write(conf, avgThroughput / count, avgLatency / count, stop - start);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Map<String, BoltMetrics> currentBoltStats = new HashMap<>();
+        for (String key : boltMap.keySet())
+            currentBoltStats.put(key, ((BoltMetricsUpdater) boltMap.get(key).getNode().getComponentUpdater()).getBoltMetrics());
+        conf = new TopologyConfiguration(workers, previousRootStats, currentBoltStats);
+        previousConfigs.add(conf);
+
+        histThroughput.add(avgThroughput / count);
+        histLatency.add(avgLatency / count);
+
+        avgThroughput = 0d;
+        avgLatency = 0d;
+        count = 0;
+
         rebalanced = false;
-
-
+        start = System.currentTimeMillis();
     }
 
 
@@ -142,6 +189,11 @@ public class FlowCheck {
         for (String key : spoutMap.keySet()) {
 
             currentRootStats.put(key, ((SpoutMetricsUpdater)spoutMap.get(key).getNode().getComponentUpdater()).getSpoutMetrics());
+
+            avgThroughput += currentRootStats.get(key).getAckedRate();
+            avgLatency += currentRootStats.get(key).getCompleteLatency();
+            count++;
+
             System.out.println("Spout: " + key + " target throughput: " + targetThroughput.get(key) + " current throughput: " + currentRootStats.get(key).getAckedRate());
 
             if(targetThroughput.get(key) > currentRootStats.get(key).getAckedRate()) {
