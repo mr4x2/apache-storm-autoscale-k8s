@@ -92,11 +92,15 @@ def load_campaign(data_dir: str, schema: str = "metrics_schema.json") -> Campaig
     meta = _validate_columns(pd.read_csv(meta_path), sf["run_metadata"], "run_metadata.csv")
 
     ts_frames, rb_frames = [], []
-    for p in sorted(glob.glob(os.path.join(data_dir, "timeseries_*.csv"))):
+    for p in sorted(glob.glob(os.path.join(data_dir, "**", "timeseries_*.csv"), recursive=True)
+                    + glob.glob(os.path.join(data_dir, "timeseries_*.csv"))):
+        p = os.path.normpath(p)
         df = _validate_columns(pd.read_csv(p), sf["timeseries"], os.path.basename(p))
         _validate_timeseries_rows(df, os.path.basename(p), sch)
         ts_frames.append(df)
-    for p in sorted(glob.glob(os.path.join(data_dir, "rebalance_*.csv"))):
+    for p in sorted(glob.glob(os.path.join(data_dir, "**", "rebalance_*.csv"), recursive=True)
+                    + glob.glob(os.path.join(data_dir, "rebalance_*.csv"))):
+        p = os.path.normpath(p)
         df = pd.read_csv(p)
         if len(df):  # header-only (static) is valid
             df = _validate_columns(df, sf["rebalance_events"], os.path.basename(p))

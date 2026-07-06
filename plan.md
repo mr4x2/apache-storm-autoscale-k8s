@@ -35,18 +35,18 @@ Total new runs: 39 × ~45 min (run + reset) ≈ **29 h** of cluster time.
   kubectl create -f k8s/storm-pvc.yml
   kubectl create -f k8s/storm-k8s.yml
   ```
-- [ ] Deploy monitoring stack (`k8s/monitoring/`)
-- [ ] Deploy storm-exporter; confirm `weight_scale{ClusterHost="nimbus-ui:8081"}` appears in Prometheus
+- [X] Deploy monitoring stack (`k8s/monitoring/`)
+- [X] Deploy storm-exporter; confirm `weight_scale{ClusterHost="nimbus-ui:8081"}` appears in Prometheus
 - [ ] Deploy KEDA operator
-- [ ] Deploy topology inside nimbus: `storm jar Storm-IOTdata-1.0.jar com.storm.iotdata.MainTopo`
-- [ ] Start MQTT publisher on the GCE VM at 1k msg/s; confirm throughput in Grafana
+- [X] Deploy topology inside nimbus: `storm jar Storm-IOTdata-1.0.jar com.storm.iotdata.MainTopo`
+- [X] Start MQTT publisher on the GCE VM at 1k msg/s; confirm throughput in Grafana
 
 ### 0-B · Build both JARs and copy to nimbus
 
-- [ ] `cd storm-src && mvn package` → verify both JARs exist:
+- [X] `cd storm-src && mvn package` → verify both JARs exist:
   - `target/storm-autoscale-v1-1.0.jar`
   - `target/storm-autoscale-aristo-1.0.jar`
-- [ ] Copy both JARs into the nimbus pod:
+- [X] Copy both JARs into the nimbus pod:
   ```bash
   kubectl cp target/storm-autoscale-v1-1.0.jar \
     <nimbus-pod>:/opt/storm/lib/ -n storm-cluster
@@ -154,7 +154,9 @@ Randomise run order across conditions to avoid warm-cache bias.
   Full metric list in `docs/metrics-schema.md §1`.
 - [ ] Save `timeseries_<run_id>.csv` + `rebalance_<run_id>.csv` to
   `docs/experiment-results/G1/<condition>/`
+  > ✅ subdirectory layout works — `dynamix_analysis.py` glob is now recursive
 - [ ] Append row to `docs/experiment-results/run_metadata.csv`
+  > `run_metadata.csv` must stay in the top-level `docs/experiment-results/` (not in a subdir)
 
 ### G1 done when
 
@@ -173,8 +175,16 @@ of the original cumulative formula.
 **Runs:** 3 new runs (original v1) + reuse G1-aristo_only as modified-v1 arm = **3 new runs**.
 **Feeds:** F5 → paper §III.C.
 
-> Note: G1-aristo_only runs **are** the G2-aristo_mod_v1 arm. Copy or symlink those CSVs
-> under `G2/aristo_mod_v1/` so the analysis script sees both arms.
+> ⚠️ **Reuse requires column editing, not just copy/symlink.** `summarize_group2()` filters
+> `group == "G2"`. Copied G1 files still have `group="G1"` and will be silently ignored.
+> After copying, run:
+> ```python
+> import pandas as pd, glob
+> for p in glob.glob("docs/experiment-results/G2/aristo_mod_v1/timeseries_*.csv"):
+>     df = pd.read_csv(p); df["group"] = "G2"; df["condition"] = "aristo_mod_v1"; df.to_csv(p, index=False)
+> for p in glob.glob("docs/experiment-results/G2/aristo_mod_v1/rebalance_*.csv"):
+>     df = pd.read_csv(p); df["group"] = "G2"; df["condition"] = "aristo_mod_v1"; df.to_csv(p, index=False)
+> ```
 
 ### Run matrix
 
@@ -199,6 +209,10 @@ Procedure: identical to G1, KEDA off, swap only the JAR.
 stability-vs-churn trade-off.
 **Runs:** 7 sweep points × 3 replicates + 3 shared baseline = **24 runs** (reuse G1-dynamix as
 baseline arm).
+
+> ⚠️ **Same reuse column-edit rule as G2.** G1-dynamix CSVs have `group="G1"`. After copying
+> to `G3/baseline/`, update `group="G3"` and `condition="baseline"` using the same Python
+> snippet as above (replacing path and condition label).
 **Feeds:** F6, Table T3 → paper §V.
 
 ### Sweep matrix

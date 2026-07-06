@@ -83,7 +83,7 @@ storm jar storm-autoscale-aristo-1.0.jar org.apache.storm.starter.rulebase.arist
 |---|---|
 | Throughput (msgs/s) over time | `sum(rate(spouts_acked{SpoutId="spout-data-iot-data"}[1m]))` |
 | End-to-end latency (ms) | `spouts_complete_latency{SpoutId="spout-data-iot-data"}` |
-| Bolt capacity | `avg(bolts_capacity{BoltId=~"^split-.*"})` |
+| Bolt capacity (`capacity_max_bolt`) | `max(bolts_capacity{BoltId=~"^split-.*"})` |
 | Worker utilization | `worker_cluster_used{ClusterHost="nimbus-ui:8081"} / worker_cluster_total{ClusterHost="nimbus-ui:8081"}` |
 | `weight_scale` | `weight_scale{ClusterHost="nimbus-ui:8081"}` |
 | Supervisor pod count | `kubectl get statefulset supervisor -n storm-cluster -o jsonpath='{.status.replicas}'` (poll) or Prometheus |
