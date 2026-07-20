@@ -47,10 +47,10 @@ spec:
           resources:
             requests:
               cpu: "500m"
-              memory: "512Mi"
-            limits:
-              cpu: "1000m"
               memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
 
 ---
 apiVersion: apps/v1
@@ -80,11 +80,11 @@ spec:
             - containerPort: 6703
           resources:
             requests:
-              cpu: "1500m"
-              memory: "2Gi"
+              cpu: "500m"
+              memory: "1500Mi"
             limits:
-              cpu: "3500m"
-              memory: "4Gi"
+              cpu: "2000m"
+              memory: "3Gi"
               
 ---
 apiVersion: apps/v1

@@ -1,3 +1,2 @@
-# GKE: no manual PV needed — PVCs use storageClassName: standard which triggers
-# GKE's pd.csi.storage.gke.io driver to provision a Google Persistent Disk automatically.
-# The hostPath PV that was here does not work on GKE (read-only node filesystem).
+# No manual PV needed — mysql-pvc uses storageClassName: standard which is
+# auto-provisioned on both GKE (pd.csi.storage.gke.io) and kind (rancher.io/local-path).

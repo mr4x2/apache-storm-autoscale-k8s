@@ -1,6 +1,5 @@
-# GKE: no manual PVs needed — both PVCs below use storageClassName: standard which triggers
-# GKE's pd.csi.storage.gke.io driver to provision Google Persistent Disks automatically.
-# The hostPath PVs that were here (/mnt/gra-pv, /mnt/prom-pv) do not work on GKE.
+# No manual PVs needed — both PVCs below use storageClassName: standard which is
+# auto-provisioned on both GKE (pd.csi.storage.gke.io) and kind (rancher.io/local-path).
 
 ---
 apiVersion: v1

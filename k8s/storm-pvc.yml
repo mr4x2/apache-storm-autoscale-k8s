@@ -1,5 +1,7 @@
 ---
 # Persistent Volume Claim
+# storageClassName: standard works on both GKE (pd.csi.storage.gke.io) and
+# kind (rancher.io/local-path) — no manual PV needed on either.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
