@@ -8,14 +8,37 @@ spec:
     name: supervisor
     kind: StatefulSet
   minReplicaCount: 1
-  maxReplicaCount: 7
+  maxReplicaCount: 3          # thesis §3.3.2.2 caps supervisors at 3 (was 7)
+  pollingInterval: 30         # check weight_scale every 30s (was default 30s) → slower reaction
+  cooldownPeriod: 300         # wait 300s of low weight before scaling back down
   initialCooldownPeriod: 300
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        # Pods are the EXPENSIVE layer: scale out slowly and last, one pod at a time,
+        # only after weight_scale stays high for a full stabilization window. This lets
+        # ARiSto fill the slots on existing supervisors before KEDA adds another pod.
+        scaleUp:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 300   # at most +1 pod / 5 min
+        scaleDown:
+          stabilizationWindowSeconds: 600
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 600   # release at most 1 pod / 10 min (stream-safe)
   triggers:
     - type: prometheus
       metricType: Value
       metadata:
         serverAddress: http://prometheus.storm-cluster.svc.cluster.local:9090
         metricName: weight_scale
+        # Keep thesis/G3 baseline = 0.75. "Pods scale slowly and last" comes from the
+        # HPA timing above (300s stabilization + max +1 pod/5min + max 3), NOT from a
+        # raised threshold — raising it would collide with the G3 wscale_threshold sweep
+        # (0.65 / 0.85 around 0.75) and move the documented baseline.
         threshold: "0.75"
         query: weight_scale{ClusterHost="nimbus-ui:8081"}
-

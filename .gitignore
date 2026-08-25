@@ -9,3 +9,6 @@ analysis/data/
 analysis/figures/
 analysis/tables/
 analysis/__pycache__/
+*.csv
+*.log
+*.png

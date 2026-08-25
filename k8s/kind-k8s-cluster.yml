@@ -8,7 +8,7 @@ kubeadmConfigPatches:
   kind: ClusterConfiguration
   apiServer:
     certSANs:
-    - "34.21.210.47"
+    - "35.185.183.166"
     - "127.0.0.1"
     - "localhost"
 nodes:

@@ -90,9 +90,18 @@ def custom_calculate():
         "botlCapacity": 0.2,
         "spoutLatency": 0.2,
     }
+    # Clip each normalized signal to [0, 1] before weighting so no single signal
+    # can dominate the composite. Without this, spoutLatency = value/100 is
+    # unbounded: a 12 s latency spike yields 0.2 * 12607/100 = 25.2, pinning the
+    # weight far above the 0.7 threshold and slamming KEDA to max pods regardless
+    # of worker/bolt state. Clipping makes weight_total a bounded [0, 1] composite
+    # (weights sum to 1.0), so 0.7 stays a meaningful "70% saturated" threshold.
+    RATIO_CLIP = 1.0
     for item, value in fetch_metrics().items():
-        weight_total += weight_condition[item] * value / keda_threshold[item]
-        print(f"metric{item}: ratio is {weight_condition[item] * value / keda_threshold[item]}")
+        ratio = min(value / keda_threshold[item], RATIO_CLIP)
+        term = weight_condition[item] * ratio
+        weight_total += term
+        print(f"metric{item}: ratio is {term} (clipped from {value / keda_threshold[item]:.3f})")
     return weight_total
 
 

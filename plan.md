@@ -18,6 +18,113 @@ Total new runs: 39 × ~45 min (run + reset) ≈ **29 h** of cluster time.
 | G3 — parameter sensitivity | 🔲 not started | |
 | Paper fix — weight_scale formula | 🔲 not started | see §Note 1 |
 | Paper fix — OutputWriter in v1 | 🔲 not started | see §Note 2 |
+| **BLOCKER — topology flow-control** | 🟡 code fixed, not verified | **see §Blocker 0 — gates ALL real runs** |
+
+---
+
+## ⚠ Blocker 0 — Topology flow-control (fix + verify before ANY real run)
+
+**Symptom (found 2026-08-04 in the real G1 runs under `scripts/docs/experiment-results/G1/`):**
+neither low nor high traffic scales like the original thesis. Under heavy load the topology
+**collapses** — `complete_latency` hit **12,608 ms**, throughput fell to **0**, and this did
+not recover even after ARiSto scaled workers 2→4 and KEDA scaled pods 1→3. Under low load
+nothing scales (weight ≈ 0.5). Every condition tops out at the **same ~600 msg/s ceiling**,
+so throughput is currently NOT a valid comparison metric.
+
+**Root cause:** no backpressure + an unreachable setpoint + an unbounded metric.
+`weight_scale ≈ latency_ms / 500` (unbounded latency term) → explodes to 25 → KEDA pegs pods
+uselessly, because the bottleneck is downstream (sum/forecast/MySQL sink), not the parallel
+split bolts (their capacity was only ~0.5, never maxed). Adding workers/pods can't drain a
+sink bottleneck.
+
+### Fixes applied (2026-08-04) — need redeploy + verify
+
+| # | file | change | status |
+|---|---|---|---|
+| 1 | `config/storm-nimbus.yaml:268` | `topology.max.spout.pending: null → 1000` (flow control) | ✅ edited, ⏳ redeploy |
+| 2 | `storm-src/src/main/resources/target.txt` | `4000 → 600` both spouts (reachable setpoint; **placeholder — calibrate**) | ✅ edited, ⏳ redeploy |
+| 3 | `k8s/keda/custom-metrics/main.py:93` | clip each normalized signal to [0,1] so latency can't dominate | ✅ edited (see caveat) |
+
+> **Fix #3 caveat:** `main.py` is NOT in the live KEDA path (see §Controller below). The
+> `weight_scale` KEDA actually queries is published by **storm_exporter**
+> ([mr4x2/storm_exporter_prometheus](https://github.com/mr4x2/storm_exporter_prometheus)).
+> The same clip MUST be applied there for live behavior to change. The `main.py` edit only
+> fixes the in-repo copy / documents the intended formula.
+>
+> Fixes #1 and #2 are baked into the topology at submit time → require `storm kill
+> iot-smarthome` + resubmit (and rebuild the autoscaler JAR, which bundles `target.txt`).
+
+### Why reduce target.txt (answers "I set 4000 so ARiSto runs forever")
+
+`FlowCheck.java:199` only evaluates/scales a spout **while `target > current throughput`**;
+when throughput catches the target it emits "target reached" and stops. Setting target=4000
+when the lab delivers/handles only ~600 keeps that gate permanently open — but that is **not**
+healthy "runs forever," it is **never converges**: the controller always believes it is
+under-provisioned and thrashes toward max whenever any latency/throughput wobble bumps
+severity. A reviewer reads "never reaches steady state" as an *unstable controller*, not a
+feature. Also the target is a **demand/SLA setpoint** — asking for 4000 msg/s of acked
+throughput is meaningless when only ~600 msg/s is ever offered/achievable.
+
+**To get continuous, legible autoscaling (what you actually want):** ramp the *offered load*
+against a *reachable* target. As load climbs each step, throughput < target keeps the gate
+open, severity builds from the real load increase → scale out → throughput catches the
+target → converges → next louder step reopens it = the staircase "resources track load"
+figure. Severity magnitude comes from throughput-drop / latency-rise trends
+(`compareSpoutStats`), NOT from the size of the target gap — so a bigger target does not
+scale "harder," it only removes the converged state. Set target ≈ the load you can actually
+inject/sustain (~600 now; raise it later only if publishers + a fixed sink genuinely push more).
+
+### Controller: nothing is missing — main.py is vestigial (confirmed vs thesis §3.3.2.2)
+
+The thesis autoscaling controller = **storm_exporter (computes `weight_scale`) + KEDA
+ScaledObject with a `type: prometheus` trigger** (`autoscale-keda.yaml`: metricName
+`weight_scale`, threshold 0.75, query straight from Prometheus). That pipeline **is already
+deployed and working** — the real dynamix run scaled pods 1→3 through it. The FastAPI
+`main.py` custom-metrics service is an earlier prototype that is **not wired into KEDA**
+(the trigger is `prometheus`, not `external`), so you are NOT missing a deployment by never
+applying it. The thesis formula (Bảng 3.1) is exactly `main.py`'s, and the thesis text
+assumes `weight_scale ∈ ~[0,1]` (worker-dominated, latency/bolt secondary) — the 12s-latency
+explosion violates that design intent, so the clip **restores** the thesis model, it does not
+change it. One real config drift to note: `autoscale-keda.yaml` sets `maxReplicaCount: 7`
+while the thesis specifies max 3.
+
+### Layer-coordination tuning (2026-08-04) — "ARiSto first, pods slow & last"
+
+Goal: the cheap/fast layer (ARiSto executors+workers) exhausts its ability before the
+expensive/slow layer (KEDA pods) adds infrastructure. Symptom before tuning: pods scaled
+fast, workers slow — root cause was the `weight_scale`=25 explosion (now clipped) slamming
+KEDA to max instantly.
+
+- **KEDA slowed via timing, NOT threshold** (`autoscale-keda.yaml`): `maxReplicaCount 7→3`
+  (thesis), `pollingInterval 60`, `cooldownPeriod 300`, HPA `scaleUp` stabilization 300s +
+  max **+1 pod / 5 min**, `scaleDown` 600s. **Threshold kept at 0.75** — raising it would
+  collide with the G3 `wscale_threshold` sweep (0.65/0.85 around 0.75) and move the baseline.
+- **The hierarchy is mechanical:** each supervisor pod has **4 slots** (`supervisor.slots.ports`
+  6700–6703). ARiSto fills a pod's 4 slots → utilization →1.0 → weight crosses 0.75 → KEDA
+  adds ONE pod (slowly) → ARiSto fills the new slots. `maxWorkers=28` ≫ slot ceiling (12 at
+  3 pods), so ARiSto is slot-bound, not cap-bound — correct.
+- **ARiSto "faster" lever (optional, needs JAR rebuild):** `FlowCheck.java:69` `maxSeverity
+  2→1` reacts on the first bad cycle instead of two. ⚠️ increases churn; also there is an
+  existing **scale-in-to-0 flap** in the real data (`rebalance_G1-dynamix-r1`: workers 2→0).
+  Decide after the diagnostic run — don't stack an aggressive scale-out on an unfixed scale-in.
+
+> ⚠️ Reminder: this shapes the pod/worker CURVES. It does not create throughput — that still
+> depends on the sink bottleneck (diagnostic gate below). Tune the system, then report what it
+> actually does; do not tune toward a desired conclusion.
+
+### 🚦 Diagnostic gate — the run that decides if a paper exists
+
+After redeploying #1–2, run **one dynamix** run at the moderate ramp **1→2→4→6 buildings,
+`SPEED=100`** (≈70→140→280→420 msg/s; do NOT jump to 8 = collapse zone), 10 min/step, and check:
+
+- [ ] latency stays **bounded** (sub-second), not 12s
+- [ ] `weight_scale` stays in a **sane range** (~[0,1]), not 25
+- [ ] **throughput rises and latency falls when scaling fires** ← the make-or-break test
+- [ ] Recalibrate `target.txt` to the measured sustained single-worker throughput
+
+**If throughput tracks scaling → run the full G1/G2/G3 matrix.**
+**If throughput still flatlines when workers/pods increase → the sink is the bottleneck;
+no autoscaler can help until it is parallelized. Fix that before spending 29 h of runs.**
 
 ---
 
@@ -166,6 +273,32 @@ Randomise run order across conditions to avoid warm-cache bias.
 - [ ] `python3 analysis/dynamix_plots.py docs/experiment-results` → F1–F4 regenerated from real data
 - [ ] Delete synthetic `analysis/data/` so it can't be confused with real results
 
+### Post-experiment — window-cap the real-data comparison (§Note 3)
+
+`dynamix` reacts slower than the fixed 30-min load ramp (pod-level KEDA scaling
++ ARiSto worker growth need time to settle), so its capture window can run
+longer than static/aristo_only. Comparing full raw ranges would let that extra
+tail skew the comparison — not apples-to-apples. `analysis/compare_g1_real.py`
+now supports `--window-cap` to fix this (done 2026-08-05, ready to use once a
+clean G1-dynamix run exists — **do not run this against the current
+`G1-dynamix-r1` file**, see §Note 4).
+
+- [ ] After a clean, hands-off G1-dynamix run replaces the concatenated one:
+  `scripts/venv/bin/python3 analysis/compare_g1_real.py --window-cap auto`
+  (caps every condition to the shortest condition's max `t_s`; pass a number
+  of seconds instead of `auto` to force a specific window, e.g. `1800`)
+- [ ] Check the printed `full max t_s` / `used for comparison` table — confirm
+  which condition(s) got truncated and note it in the paper's methodology
+  (dynamix's post-cap tail is legitimate content for a separate
+  settling-behavior figure, just not the headline comparison numbers)
+- [ ] `dynamix_analysis.py`'s schema-driven summary tables (`per_level_metrics`,
+  `summarize_group1`) already implicitly cap at `load_profile_default.total_duration_s`
+  (1800s, `docs/metrics-schema.json`) since they only compute within defined
+  load-step windows — no separate change needed there, but this needs
+  reverifying once a clean run is loaded (its `_validate_timeseries_rows`
+  monotonic-`t_s` check will reject the current concatenated file, which is a
+  feature: see §Note 4)
+
 ---
 
 ## G2 — ARiSto Formula Ablation
@@ -299,3 +432,33 @@ Aristo v3/v4). `rulebase/v1/` has neither. Until OutputWriter is added:
 - F4 (rebalance count by layer) will be incomplete for the two headline conditions.
 - Fallback: infer ARiSto rebalances from step-changes in `executors_total` column of
   the timeseries. Less precise but sufficient for G1.
+  > ⚠ Possibly stale: `rulebase/v1/OutputWriter.java` + `TopologyConfiguration.java`
+  > exist now (commit `8df90b2`), and the real `G1-dynamix-r1` capture already has
+  > `layer=aristo` rows for a `workers` component (see §Note 4). Reverify against
+  > current code before assuming this note's "no layer=aristo rows" premise still holds.
+
+### §Note 3 — window-cap for the real-data comparison
+
+`static`/`keda_only`/`aristo_only` run a fixed 30-min load ramp (`docs/runbook-G1.md`
+Step 2). `dynamix` combines both layers, so KEDA pod scale-out + ARiSto worker
+placement can need longer to settle — its capture window isn't guaranteed to match
+the other three. `analysis/compare_g1_real.py --window-cap {auto|SECONDS}` truncates
+every condition to a common `t_s` range before comparing/plotting, so the headline
+numbers stay apples-to-apples; anything beyond the cap (e.g. dynamix's extra settling
+time) is still in the source CSV and worth a separate supplementary figure, just not
+mixed into the main comparison. `dynamix_analysis.py`'s schema-driven pipeline
+(`per_level_metrics`, `summarize_group1`) doesn't need the same fix — it already only
+aggregates within `load_profile_default`'s defined step windows (1800s total,
+`docs/metrics-schema.json`), so a longer tail on one condition is implicitly excluded.
+
+### §Note 4 — G1-dynamix-r1 is not usable as captured
+
+The current `scripts/docs/experiment-results/G1/dynamix/{state,rebalance}_G1-dynamix-r1.csv`
+is six concatenated poller sessions spanning 2026-08-03 23:04 → 2026-08-04 23:54 (`t_s`
+resets to 1 six times), not one clean run — `dynamix_analysis.py`'s monotonic-`t_s`
+check (`_validate_timeseries_rows`) will reject it as-is, which is correct behavior.
+The last segment (22:56–23:54, `t_s` 0–3439) also involved a manual `storm rebalance`
+to fix a supervisor pod KEDA added but ARiSto never gave workers to (see Open blocker
+#3 in `CLAUDE.md`). Don't promote this file to `analysis/data/` or window-cap around
+it expecting a valid result — re-run G1-dynamix r1/r2/r3 hands-off after the blocker
+#3 fix lands, then apply §Note 3.

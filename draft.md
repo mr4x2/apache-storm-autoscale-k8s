@@ -39,14 +39,18 @@ storm jar Storm-IOTdata-1.0-SNAPSHOT-jar-with-dependencies.jar com.storm.iotdata
 
 ```bash
 python3 export_run.py \
-    --run-id G1-autoscale-r1 \
-    --condition non-static \
+    --run-id G1-aristo_only-r1 \
+    --condition aristo_only \
     --group G1 \
     --replicate 1 \
-    --start 1784051797 \
-    --end   1784053601 \
+    --start 1784739962 \
+    --end   1784741763 \
     --prom  http://localhost:9090 \
-    --out   docs/experiment-results/G1/autoscale-aristo/
+    --out   docs/experiment-results/G1/aristo_only/
+```
+
+```bash
+--group G1 --condition static   --replicate 1 --run-id G1-static-r1      --start <s> --end <e> --out docs/experiment-results/G1/static/
 ```
 
 ```bash
@@ -67,18 +71,18 @@ kubectl exec -n storm-cluster $NIMBUS -- bash -c \
 start_epoch=$(date +%s)
 echo "START: $start_epoch"
   
-# Step 1: 1000 msg/s (1 publisher × 1000)
-sed -i 's/SPEED=.*/SPEED=1000/' mqtt.env
+# Step 1: 100 msg/s (1 publisher × 100)
+sed -i 's/SPEED=.*/SPEED=100/' mqtt.env
 docker compose --env-file mqtt.env up building_1 -d
-echo "Load step 1 started (1000 msg/s) — wait 10 min"
+echo "Load step 1 started (100 msg/s) — wait 10 min"
 sleep 600
 
-# Step 2: 4000 msg/s (4 publishers × 1000)
+# Step 2: 400 msg/s (4 publishers × 100)
 docker compose --env-file mqtt.env up building_2 building_3 building_4 -d
 echo "Load step 2 started (4000 msg/s) — wait 10 min"
 sleep 600
 
-# Step 3: 8000 msg/s (8 publishers × 1000)
+# Step 3: 8000 msg/s (8 publishers × 100)
 docker compose --env-file mqtt.env up building_5 building_6 building_7 building_8 -d
 echo "Load step 3 started (8000 msg/s) — wait 10 min"
 sleep 600
@@ -92,101 +96,56 @@ docker compose --env-file mqtt.env down
 ```
 
 
-```bash
-Step 1 — Reset cluster (every run)
 
-  NIMBUS_POD=$(kubectl get pod -n storm-cluster -l app=nimbus -o jsonpath='{.items[0].metadata.name}')
 
-  # Kill autoscaler if running
-  kubectl exec -n storm-cluster $NIMBUS_POD -- pkill -f TopologyParser || true
-
-  # Remove KEDA ScaledObject (for non-KEDA conditions)
-  kubectl delete -f k8s/keda/autoscale-keda.yaml --ignore-not-found
-
-  # Reset supervisor to 1 replica
-  kubectl scale statefulset supervisor -n storm-cluster --replicas=1
-
-  # Kill topology and redeploy
-  kubectl exec -n storm-cluster $NIMBUS_POD -- storm kill iot-smarthome -w 30
-  sleep 60
-  kubectl exec -n storm-cluster $NIMBUS_POD -- \
-    storm jar /app/Storm-IOTdata-1.0.jar com.storm.iotdata.MainTopo
-storm jar Storm-IOTdata-1.0-SNAPSHOT-jar-with-dependencies.jar com.storm.iotdata.MainTopo
-
-  # Stop publisher
-  ssh <GCE-VM> "cd ~/mqtt && docker compose --env-file mqtt.env down"
-
-  # Wait for topology to be ACTIVE
-  sleep 30
-  
-  Step 2 — Set condition switches
-
-  ┌─────────────┬──────────────────────┬────────────────────┐
-  │  Condition  │        ARiSto        │        KEDA        │
-  ├─────────────┼──────────────────────┼────────────────────┤
-  │ static      │ nothing              │ nothing            │
-  ├─────────────┼──────────────────────┼────────────────────┤
-  │ aristo_only │ start autoscaler JAR │ nothing            │
-  ├─────────────┼──────────────────────┼────────────────────┤
-  │ keda_only   │ nothing              │ apply ScaledObject │
-  ├─────────────┼──────────────────────┼────────────────────┤
-  │ dynamix     │ start autoscaler JAR │ apply ScaledObject │
-  └─────────────┴──────────────────────┴────────────────────┘
-  
-  For aristo_only / dynamix — start autoscaler in background:
-  kubectl exec -n storm-cluster $NIMBUS_POD -- bash -c \
-    "nohup storm jar /storm-autoscale-v1-1.0.jar \
-     org.apache.storm.starter.rulebase.v1.TopologyParser \
-     input.txt target.txt > /autoscaler-v1.log 2>&1 &"
-
-  For keda_only / dynamix — apply ScaledObject:
-  kubectl apply -f k8s/keda/autoscale-keda.yaml
-
-  Step 3 — Record start and run load ramp
-
-  # On GCE VM — record start time
-  start_epoch=$(date +%s)
-  echo "START: $start_epoch"
-
-  # Step 1: 1000 msg/s (1 publisher × 1000)
-  sed -i 's/SPEED=.*/SPEED=1000/' ~/mqtt/mqtt.env
-  docker compose --env-file ~/mqtt/mqtt.env up building_1 -d
-  echo "Load step 1 started (1000 msg/s) — wait 10 min"
-  sleep 600
-
-  # Step 2: 4000 msg/s (4 publishers × 1000)
-  docker compose --env-file ~/mqtt/mqtt.env up building_2 building_3 building_4 -d
-  echo "Load step 2 started (4000 msg/s) — wait 10 min"
-  sleep 600
-
-  # Step 3: 8000 msg/s (8 publishers × 1000)
-  docker compose --env-file ~/mqtt/mqtt.env up building_5 building_6 building_7 building_8 -d
-  echo "Load step 3 started (8000 msg/s) — wait 10 min"
-  sleep 600
-
-  # Record end time
-  end_epoch=$(date +%s)
-  echo "END: $end_epoch"
-  
-  # Stop publishers
-  docker compose --env-file ~/mqtt/mqtt.env down
-
-  Step 4 — Export data (run from GCE VM after each run)
-
-  # Example for G1-static-r1 — substitute run_id/condition/replicate each time
-  python3 export_run.py \
-    --run-id G1-static-r1 \
-    --condition static \
-    --group G1 \
-    --replicate 1 \
-    --start $start_epoch \
-    --end   $end_epoch \
-    --prom  http://34.126.115.181:30003 \
-    --out   docs/experiment-results/G1/static/
-
-  Then manually append the printed metadata row to docs/experiment-results/run_metadata.csv.
-
-  Also copy the rebalance log for aristo conditions:
-  kubectl cp storm-cluster/$NIMBUS_POD:/iot-smarthome_aristo_rb.txt \
-    docs/experiment-results/G1/aristo_only/rebalance_G1-aristo_only-r1_raw.txt
+```cmd
+kubectl config unset clusters.kind-storm.certificate-authority-data
+kubectl config set-cluster kind-storm \
+  --server=https://35.185.183.166:6443 \
+  --insecure-skip-tls-verify=true
+kubectl get nodes
 ```
+
+Sửa lại env, tăng cường độ ở part2 và part 3 thử xem
+
+
+
+sed -i 's/SPEED=.*/SPEED=100/' mqtt.env
+docker compose --env-file mqtt.env up building_1 -d;                                    sleep 600
+docker compose --env-file mqtt.env up building_3 building_4 building_2 -d;              sleep 600
+docker compose --env-file mqtt.env up building_5 building_6 building_7 building_8 -d;   sleep 600
+docker compose --env-file mqtt.env down          # stop publishers
+
+CSV_FILE_0=house-0.csv
+CSV_FILE_1=house-1.csv
+CSV_FILE_2=house-2.csv
+CSV_FILE_3=house-3.csv
+CSV_FILE_4=house-4.csv
+CSV_FILE_5=house-5.csv
+CSV_FILE_6=house-6.csv
+CSV_FILE_7=house-7.csv
+CSV_FILE_8=house-8.csv
+CSV_FILE_9=house-9.csv
+CSV_FILE_10=house-10.csv
+
+```bash
+sed -i 's/SPEED=.*/SPEED=100/' mqtt.env
+docker compose --env-file mqtt.env up building_1 building_2 building_3 building_4 building_5 -d;  sleep 1800
+docker compose --env-file mqtt.env down;
+sudo shutdown -h now
+```
+
+  cd /Users/mr8/project/storm_exporter_prometheus
+  # build a new tag
+  docker build -t mr4x2/stormexporter:v1.2.6 .
+
+  # get it to the cluster — pick one:
+  #   (kind on the VM)  kind load docker-image mr4x2/stormexporter:v1.2.6 --name storm
+  #   (registry)        docker push mr4x2/stormexporter:v1.2.6
+
+  # point the deployment at the new tag + restart
+  kubectl set image deployment/storm-exporter storm-exporter=mr4x2/stormexporter:v1.2.6 -n storm-cluster
+  kubectl rollout status deployment/storm-exporter -n storm-cluster
+
+
+docs/g1-known-issues.md
